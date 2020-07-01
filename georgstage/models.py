@@ -5,29 +5,33 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-class Trip(Base):
-    __tablename__ = 'trip'
+class Sailing(Base):
+    __tablename__ = 'sailing'
     id = Column(Integer, primary_key=True)
-    start_date = Column(DateTime, nullable=False, unique=True)
+    created_dt = Column(DateTime, nullable=False)
     tasks = relationship('Task')
+    shifts = relationship('Shift')
 
 
-class Watch(Base):
-    __tablename__ = 'watch'
-    id = Column(Integer, primary_key=True)
-    trip_id = Column(Integer, ForeignKey('trip.id'))
-    date = Column(DateTime, nullable=False)
-    watch_no = Column(Integer, nullable=False)  # 1-6
+class Shift(Base):
+    __tablename__ = 'shift'
+    id = Column(Unicode, primary_key=True)
+    sailing_id = Column(Unicode, ForeignKey('sailing.id'))
+    created_dt = Column(DateTime, nullable=False)
+    ocean_dt = Column(DateTime, nullable=False)
+    shift_no = Column(Integer, nullable=False)  # 1-6
     team_no = Column(Integer, nullable=False)  # 1-3
 
 
 class Task(Base):
     __tablename__ = 'task'
     id = Column(Integer, primary_key=True)
-    trip_id = Column(Integer, ForeignKey('trip.id'))
-    date = Column(DateTime, nullable=False)
-    sailor_no = Column(Integer, nullable=False) # 1-60
-    task_code = Column(Integer, nullable=False)
+    sailing_id = Column(Integer, ForeignKey('sailing.id'))
+    created_dt = Column(DateTime, nullable=False)
+    ocean_dt = Column(DateTime, nullable=False)
+    gast_no = Column(Integer, nullable=False) # 1-60
+    team_no = Column(Integer, nullable=False) # 1-3
+    task_code = Column(Unicode, nullable=False) # e.g. ve1
 
 
 engine = create_engine('sqlite:///:memory:', echo=True)

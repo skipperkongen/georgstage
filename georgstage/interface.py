@@ -1,14 +1,15 @@
 from datetime import datetime
-
-try:
-    import tkinter as tk
-except ImportError:
-    import Tkinter as tk
+import tkinter as tk
+from tkinter import messagebox
 
 class Gui():
 
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, root, controller):
+        self.controller = controller
+        self.controller.view = self
+        self.build(root)
+
+    def build(self, root):
         # Static widgets
         tk.Label(root, text='Valgte dag').grid(row=0, column=0, sticky=tk.E)
         tk.Label(root, text='Skifter').grid(row=1, column=0, sticky=tk.E)
@@ -37,249 +38,236 @@ class Gui():
         tk.Label(root, text='Syge (f.eks 1,2,3)').grid(row=16, column=0, sticky=tk.E)
 
         # Variables
-        self._date = tk.StringVar()
-        self._skifte1 = tk.StringVar()
-        self._skifte2 = tk.StringVar()
-        self._skifte3 = tk.StringVar()
-        self._skifte4 = tk.StringVar()
-        self._skifte5 = tk.StringVar()
-        self._skifte6 = tk.StringVar()
+        vars = {
+            'date': tk.StringVar(),
+            'skifte1': tk.StringVar(),
+            'skifte2': tk.StringVar(),
+            'skifte3': tk.StringVar(),
+            'skifte4': tk.StringVar(),
+            'skifte5': tk.StringVar(),
+            'skifte6': tk.StringVar(),
+            've1': tk.StringVar(),
+            've2': tk.StringVar(),
+            've3': tk.StringVar(),
+            've4': tk.StringVar(),
+            've5': tk.StringVar(),
+            've6': tk.StringVar(),
+            'o1': tk.StringVar(),
+            'o2': tk.StringVar(),
+            'o3': tk.StringVar(),
+            'o4': tk.StringVar(),
+            'o5': tk.StringVar(),
+            'o6': tk.StringVar(),
+            'u1': tk.StringVar(),
+            'u2': tk.StringVar(),
+            'u3': tk.StringVar(),
+            'u4': tk.StringVar(),
+            'u5': tk.StringVar(),
+            'u6': tk.StringVar(),
+            'bm1': tk.StringVar(),
+            'bm2': tk.StringVar(),
+            'bm3': tk.StringVar(),
+            'bm4': tk.StringVar(),
+            'bm5': tk.StringVar(),
+            'bm6': tk.StringVar(),
+            'rg1': tk.StringVar(),
+            'rg2': tk.StringVar(),
+            'rg3': tk.StringVar(),
+            'rg4': tk.StringVar(),
+            'rg5': tk.StringVar(),
+            'rg6': tk.StringVar(),
+            'uga1': tk.StringVar(),
+            'uga2': tk.StringVar(),
+            'uga3': tk.StringVar(),
+            'uga4': tk.StringVar(),
+            'uga5': tk.StringVar(),
+            'uga6': tk.StringVar(),
+            'ugb1': tk.StringVar(),
+            'ugb2': tk.StringVar(),
+            'ugb3': tk.StringVar(),
+            'ugb4': tk.StringVar(),
+            'ugb5': tk.StringVar(),
+            'ugb6': tk.StringVar(),
+            'ugc1': tk.StringVar(),
+            'ugc2': tk.StringVar(),
+            'ugc3': tk.StringVar(),
+            'ugc4': tk.StringVar(),
+            'ugc5': tk.StringVar(),
+            'ugc6': tk.StringVar(),
+            'ugd1': tk.StringVar(),
+            'ugd2': tk.StringVar(),
+            'ugd3': tk.StringVar(),
+            'ugd4': tk.StringVar(),
+            'ugd5': tk.StringVar(),
+            'ugd6': tk.StringVar(),
+            'uge1': tk.StringVar(),
+            'uge2': tk.StringVar(),
+            'uge3': tk.StringVar(),
+            'uge4': tk.StringVar(),
+            'uge5': tk.StringVar(),
+            'uge6': tk.StringVar(),
+            'pga': tk.StringVar(),
+            'pgb': tk.StringVar(),
+            'hu1': tk.StringVar(),
+            'hu2': tk.StringVar(),
+            'hu3': tk.StringVar(),
+            'hu4': tk.StringVar(),
+            'hu5': tk.StringVar(),
+            'hu6': tk.StringVar(),
+            'dk1': tk.StringVar(),
+            'dk2': tk.StringVar(),
+            'dk3': tk.StringVar(),
+            'dk4': tk.StringVar(),
+            'dk5': tk.StringVar(),
+            'dk6': tk.StringVar(),
+            'syge': tk.StringVar()
+        }
 
-        self._ve1 = tk.StringVar()
-        self._ve2 = tk.StringVar()
-        self._ve3 = tk.StringVar()
-        self._ve4 = tk.StringVar()
-        self._ve5 = tk.StringVar()
-        self._ve6 = tk.StringVar()
+        self._vars = vars
 
-        self._o1 = tk.StringVar()
-        self._o2 = tk.StringVar()
-        self._o3 = tk.StringVar()
-        self._o4 = tk.StringVar()
-        self._o5 = tk.StringVar()
-        self._o6 = tk.StringVar()
-
-        self._u1 = tk.StringVar()
-        self._u2 = tk.StringVar()
-        self._u3 = tk.StringVar()
-        self._u4 = tk.StringVar()
-        self._u5 = tk.StringVar()
-        self._u6 = tk.StringVar()
-
-        self._bm1 = tk.StringVar()
-        self._bm2 = tk.StringVar()
-        self._bm3 = tk.StringVar()
-        self._bm4 = tk.StringVar()
-        self._bm5 = tk.StringVar()
-        self._bm6 = tk.StringVar()
-
-        self._rg1 = tk.StringVar()
-        self._rg2 = tk.StringVar()
-        self._rg3 = tk.StringVar()
-        self._rg4 = tk.StringVar()
-        self._rg5 = tk.StringVar()
-        self._rg6 = tk.StringVar()
-
-        self._uga1 = tk.StringVar()
-        self._uga2 = tk.StringVar()
-        self._uga3 = tk.StringVar()
-        self._uga4 = tk.StringVar()
-        self._uga5 = tk.StringVar()
-        self._uga6 = tk.StringVar()
-
-        self._ugb1 = tk.StringVar()
-        self._ugb2 = tk.StringVar()
-        self._ugb3 = tk.StringVar()
-        self._ugb4 = tk.StringVar()
-        self._ugb5 = tk.StringVar()
-        self._ugb6 = tk.StringVar()
-
-        self._ugc1 = tk.StringVar()
-        self._ugc2 = tk.StringVar()
-        self._ugc3 = tk.StringVar()
-        self._ugc4 = tk.StringVar()
-        self._ugc5 = tk.StringVar()
-        self._ugc6 = tk.StringVar()
-
-        self._ugd1 = tk.StringVar()
-        self._ugd2 = tk.StringVar()
-        self._ugd3 = tk.StringVar()
-        self._ugd4 = tk.StringVar()
-        self._ugd5 = tk.StringVar()
-        self._ugd6 = tk.StringVar()
-
-        self._uge1 = tk.StringVar()
-        self._uge2 = tk.StringVar()
-        self._uge3 = tk.StringVar()
-        self._uge4 = tk.StringVar()
-        self._uge5 = tk.StringVar()
-        self._uge6 = tk.StringVar()
-
-        self._pga = tk.StringVar()
-        self._pgb = tk.StringVar()
-
-        self._hu1 = tk.StringVar()
-        self._hu2 = tk.StringVar()
-        self._hu3 = tk.StringVar()
-        self._hu4 = tk.StringVar()
-        self._hu5 = tk.StringVar()
-        self._hu6 = tk.StringVar()
-
-        self._dk1 = tk.StringVar()
-        self._dk2 = tk.StringVar()
-        self._dk3 = tk.StringVar()
-        self._dk4 = tk.StringVar()
-        self._dk5 = tk.StringVar()
-        self._dk6 = tk.StringVar()
-
-        self._syge = tk.StringVar()
 
 
         # Widgets controlled by variables
-        tk.Label(root, textvariable=self._date, background='gray').grid(row=0, column=1)
+        tk.Label(root, textvariable=vars['date'], background='gray').grid(row=0, column=1)
 
-        tk.Entry(root, textvariable=self._skifte1, justify='right', width=10).grid(row=1, column=1)
-        tk.Entry(root, textvariable=self._skifte2, justify='right', width=10).grid(row=1, column=2)
-        tk.Entry(root, textvariable=self._skifte3, justify='right', width=10).grid(row=1, column=3)
-        tk.Entry(root, textvariable=self._skifte4, justify='right', width=10).grid(row=1, column=4)
-        tk.Entry(root, textvariable=self._skifte5, justify='right', width=10).grid(row=1, column=5)
-        tk.Entry(root, textvariable=self._skifte6, justify='right', width=10).grid(row=1, column=6)
+        tk.Entry(root, textvariable=vars['skifte1'], justify='right', width=10).grid(row=1, column=1)
+        tk.Entry(root, textvariable=vars['skifte2'], justify='right', width=10).grid(row=1, column=2)
+        tk.Entry(root, textvariable=vars['skifte3'], justify='right', width=10).grid(row=1, column=3)
+        tk.Entry(root, textvariable=vars['skifte4'], justify='right', width=10).grid(row=1, column=4)
+        tk.Entry(root, textvariable=vars['skifte5'], justify='right', width=10).grid(row=1, column=5)
+        tk.Entry(root, textvariable=vars['skifte6'], justify='right', width=10).grid(row=1, column=6)
 
-        tk.Entry(root, textvariable=self._ve1, justify='right', width=10).grid(row=3, column=1)
-        tk.Entry(root, textvariable=self._ve2, justify='right', width=10).grid(row=3, column=2)
-        tk.Entry(root, textvariable=self._ve3, justify='right', width=10).grid(row=3, column=3)
-        tk.Entry(root, textvariable=self._ve4, justify='right', width=10).grid(row=3, column=4)
-        tk.Entry(root, textvariable=self._ve5, justify='right', width=10).grid(row=3, column=5)
-        tk.Entry(root, textvariable=self._ve6, justify='right', width=10).grid(row=3, column=6)
+        tk.Entry(root, textvariable=vars['ve1'], justify='right', width=10).grid(row=3, column=1)
+        tk.Entry(root, textvariable=vars['ve2'], justify='right', width=10).grid(row=3, column=2)
+        tk.Entry(root, textvariable=vars['ve3'], justify='right', width=10).grid(row=3, column=3)
+        tk.Entry(root, textvariable=vars['ve4'], justify='right', width=10).grid(row=3, column=4)
+        tk.Entry(root, textvariable=vars['ve5'], justify='right', width=10).grid(row=3, column=5)
+        tk.Entry(root, textvariable=vars['ve6'], justify='right', width=10).grid(row=3, column=6)
 
-        tk.Entry(root, textvariable=self._o1, justify='right', width=10).grid(row=4, column=1)
-        tk.Entry(root, textvariable=self._o2, justify='right', width=10).grid(row=4, column=2)
-        tk.Entry(root, textvariable=self._o3, justify='right', width=10).grid(row=4, column=3)
-        tk.Entry(root, textvariable=self._o4, justify='right', width=10).grid(row=4, column=4)
-        tk.Entry(root, textvariable=self._o5, justify='right', width=10).grid(row=4, column=5)
-        tk.Entry(root, textvariable=self._o6, justify='right', width=10).grid(row=4, column=6)
+        tk.Entry(root, textvariable=vars['o1'], justify='right', width=10).grid(row=4, column=1)
+        tk.Entry(root, textvariable=vars['o2'], justify='right', width=10).grid(row=4, column=2)
+        tk.Entry(root, textvariable=vars['o3'], justify='right', width=10).grid(row=4, column=3)
+        tk.Entry(root, textvariable=vars['o4'], justify='right', width=10).grid(row=4, column=4)
+        tk.Entry(root, textvariable=vars['o5'], justify='right', width=10).grid(row=4, column=5)
+        tk.Entry(root, textvariable=vars['o6'], justify='right', width=10).grid(row=4, column=6)
 
-        tk.Entry(root, textvariable=self._u1, justify='right', width=10).grid(row=5, column=1)
-        tk.Entry(root, textvariable=self._u2, justify='right', width=10).grid(row=5, column=2)
-        tk.Entry(root, textvariable=self._u3, justify='right', width=10).grid(row=5, column=3)
-        tk.Entry(root, textvariable=self._u4, justify='right', width=10).grid(row=5, column=4)
-        tk.Entry(root, textvariable=self._u5, justify='right', width=10).grid(row=5, column=5)
-        tk.Entry(root, textvariable=self._u6, justify='right', width=10).grid(row=5, column=6)
+        tk.Entry(root, textvariable=vars['u1'], justify='right', width=10).grid(row=5, column=1)
+        tk.Entry(root, textvariable=vars['u2'], justify='right', width=10).grid(row=5, column=2)
+        tk.Entry(root, textvariable=vars['u3'], justify='right', width=10).grid(row=5, column=3)
+        tk.Entry(root, textvariable=vars['u4'], justify='right', width=10).grid(row=5, column=4)
+        tk.Entry(root, textvariable=vars['u5'], justify='right', width=10).grid(row=5, column=5)
+        tk.Entry(root, textvariable=vars['u6'], justify='right', width=10).grid(row=5, column=6)
 
-        tk.Entry(root, textvariable=self._bm1, justify='right', width=10).grid(row=6, column=1)
-        tk.Entry(root, textvariable=self._bm2, justify='right', width=10).grid(row=6, column=2)
-        tk.Entry(root, textvariable=self._bm3, justify='right', width=10).grid(row=6, column=3)
-        tk.Entry(root, textvariable=self._bm4, justify='right', width=10).grid(row=6, column=4)
-        tk.Entry(root, textvariable=self._bm5, justify='right', width=10).grid(row=6, column=5)
-        tk.Entry(root, textvariable=self._bm6, justify='right', width=10).grid(row=6, column=6)
+        tk.Entry(root, textvariable=vars['bm1'], justify='right', width=10).grid(row=6, column=1)
+        tk.Entry(root, textvariable=vars['bm2'], justify='right', width=10).grid(row=6, column=2)
+        tk.Entry(root, textvariable=vars['bm3'], justify='right', width=10).grid(row=6, column=3)
+        tk.Entry(root, textvariable=vars['bm4'], justify='right', width=10).grid(row=6, column=4)
+        tk.Entry(root, textvariable=vars['bm5'], justify='right', width=10).grid(row=6, column=5)
+        tk.Entry(root, textvariable=vars['bm6'], justify='right', width=10).grid(row=6, column=6)
 
-        tk.Entry(root, textvariable=self._rg1, justify='right', width=10).grid(row=7, column=1)
-        tk.Entry(root, textvariable=self._rg2, justify='right', width=10).grid(row=7, column=2)
-        tk.Entry(root, textvariable=self._rg3, justify='right', width=10).grid(row=7, column=3)
-        tk.Entry(root, textvariable=self._rg4, justify='right', width=10).grid(row=7, column=4)
-        tk.Entry(root, textvariable=self._rg5, justify='right', width=10).grid(row=7, column=5)
-        tk.Entry(root, textvariable=self._rg6, justify='right', width=10).grid(row=7, column=6)
+        tk.Entry(root, textvariable=vars['rg1'], justify='right', width=10).grid(row=7, column=1)
+        tk.Entry(root, textvariable=vars['rg2'], justify='right', width=10).grid(row=7, column=2)
+        tk.Entry(root, textvariable=vars['rg3'], justify='right', width=10).grid(row=7, column=3)
+        tk.Entry(root, textvariable=vars['rg4'], justify='right', width=10).grid(row=7, column=4)
+        tk.Entry(root, textvariable=vars['rg5'], justify='right', width=10).grid(row=7, column=5)
+        tk.Entry(root, textvariable=vars['rg6'], justify='right', width=10).grid(row=7, column=6)
 
-        tk.Entry(root, textvariable=self._uga1, justify='right', width=10).grid(row=8, column=1)
-        tk.Entry(root, textvariable=self._uga2, justify='right', width=10).grid(row=8, column=2)
-        tk.Entry(root, textvariable=self._uga3, justify='right', width=10).grid(row=8, column=3)
-        tk.Entry(root, textvariable=self._uga4, justify='right', width=10).grid(row=8, column=4)
-        tk.Entry(root, textvariable=self._uga5, justify='right', width=10).grid(row=8, column=5)
-        tk.Entry(root, textvariable=self._uga6, justify='right', width=10).grid(row=8, column=6)
+        tk.Entry(root, textvariable=vars['uga1'], justify='right', width=10).grid(row=8, column=1)
+        tk.Entry(root, textvariable=vars['uga2'], justify='right', width=10).grid(row=8, column=2)
+        tk.Entry(root, textvariable=vars['uga3'], justify='right', width=10).grid(row=8, column=3)
+        tk.Entry(root, textvariable=vars['uga4'], justify='right', width=10).grid(row=8, column=4)
+        tk.Entry(root, textvariable=vars['uga5'], justify='right', width=10).grid(row=8, column=5)
+        tk.Entry(root, textvariable=vars['uga6'], justify='right', width=10).grid(row=8, column=6)
 
-        tk.Entry(root, textvariable=self._ugb1, justify='right', width=10).grid(row=9, column=1)
-        tk.Entry(root, textvariable=self._ugb2, justify='right', width=10).grid(row=9, column=2)
-        tk.Entry(root, textvariable=self._ugb3, justify='right', width=10).grid(row=9, column=3)
-        tk.Entry(root, textvariable=self._ugb4, justify='right', width=10).grid(row=9, column=4)
-        tk.Entry(root, textvariable=self._ugb5, justify='right', width=10).grid(row=9, column=5)
-        tk.Entry(root, textvariable=self._ugb6, justify='right', width=10).grid(row=9, column=6)
+        tk.Entry(root, textvariable=vars['ugb1'], justify='right', width=10).grid(row=9, column=1)
+        tk.Entry(root, textvariable=vars['ugb2'], justify='right', width=10).grid(row=9, column=2)
+        tk.Entry(root, textvariable=vars['ugb3'], justify='right', width=10).grid(row=9, column=3)
+        tk.Entry(root, textvariable=vars['ugb4'], justify='right', width=10).grid(row=9, column=4)
+        tk.Entry(root, textvariable=vars['ugb5'], justify='right', width=10).grid(row=9, column=5)
+        tk.Entry(root, textvariable=vars['ugb6'], justify='right', width=10).grid(row=9, column=6)
 
-        tk.Entry(root, textvariable=self._ugc1, justify='right', width=10).grid(row=10, column=1)
-        tk.Entry(root, textvariable=self._ugc2, justify='right', width=10).grid(row=10, column=2)
-        tk.Entry(root, textvariable=self._ugc3, justify='right', width=10).grid(row=10, column=3)
-        tk.Entry(root, textvariable=self._ugc4, justify='right', width=10).grid(row=10, column=4)
-        tk.Entry(root, textvariable=self._ugc5, justify='right', width=10).grid(row=10, column=5)
-        tk.Entry(root, textvariable=self._ugc6, justify='right', width=10).grid(row=10, column=6)
+        tk.Entry(root, textvariable=vars['ugc1'], justify='right', width=10).grid(row=10, column=1)
+        tk.Entry(root, textvariable=vars['ugc2'], justify='right', width=10).grid(row=10, column=2)
+        tk.Entry(root, textvariable=vars['ugc3'], justify='right', width=10).grid(row=10, column=3)
+        tk.Entry(root, textvariable=vars['ugc4'], justify='right', width=10).grid(row=10, column=4)
+        tk.Entry(root, textvariable=vars['ugc5'], justify='right', width=10).grid(row=10, column=5)
+        tk.Entry(root, textvariable=vars['ugc6'], justify='right', width=10).grid(row=10, column=6)
 
-        tk.Entry(root, textvariable=self._ugd1, justify='right', width=10).grid(row=11, column=1)
-        tk.Entry(root, textvariable=self._ugd2, justify='right', width=10).grid(row=11, column=2)
-        tk.Entry(root, textvariable=self._ugd3, justify='right', width=10).grid(row=11, column=3)
-        tk.Entry(root, textvariable=self._ugd4, justify='right', width=10).grid(row=11, column=4)
-        tk.Entry(root, textvariable=self._ugd5, justify='right', width=10).grid(row=11, column=5)
-        tk.Entry(root, textvariable=self._ugd6, justify='right', width=10).grid(row=11, column=6)
+        tk.Entry(root, textvariable=vars['ugd1'], justify='right', width=10).grid(row=11, column=1)
+        tk.Entry(root, textvariable=vars['ugd2'], justify='right', width=10).grid(row=11, column=2)
+        tk.Entry(root, textvariable=vars['ugd3'], justify='right', width=10).grid(row=11, column=3)
+        tk.Entry(root, textvariable=vars['ugd4'], justify='right', width=10).grid(row=11, column=4)
+        tk.Entry(root, textvariable=vars['ugd5'], justify='right', width=10).grid(row=11, column=5)
+        tk.Entry(root, textvariable=vars['ugd6'], justify='right', width=10).grid(row=11, column=6)
 
-        tk.Entry(root, textvariable=self._uge1, justify='right', width=10).grid(row=12, column=1)
-        tk.Entry(root, textvariable=self._uge2, justify='right', width=10).grid(row=12, column=2)
-        tk.Entry(root, textvariable=self._uge3, justify='right', width=10).grid(row=12, column=3)
-        tk.Entry(root, textvariable=self._uge4, justify='right', width=10).grid(row=12, column=4)
-        tk.Entry(root, textvariable=self._uge5, justify='right', width=10).grid(row=12, column=5)
-        tk.Entry(root, textvariable=self._uge6, justify='right', width=10).grid(row=12, column=6)
+        tk.Entry(root, textvariable=vars['uge1'], justify='right', width=10).grid(row=12, column=1)
+        tk.Entry(root, textvariable=vars['uge2'], justify='right', width=10).grid(row=12, column=2)
+        tk.Entry(root, textvariable=vars['uge3'], justify='right', width=10).grid(row=12, column=3)
+        tk.Entry(root, textvariable=vars['uge4'], justify='right', width=10).grid(row=12, column=4)
+        tk.Entry(root, textvariable=vars['uge5'], justify='right', width=10).grid(row=12, column=5)
+        tk.Entry(root, textvariable=vars['uge6'], justify='right', width=10).grid(row=12, column=6)
 
         frame = tk.Frame()
-        tk.Entry(frame, textvariable=self._pga, justify='right', width=4).pack(side=tk.LEFT)
-        tk.Entry(frame, textvariable=self._pgb, justify='right', width=4).pack(side=tk.LEFT)
+        tk.Entry(frame, textvariable=vars['pga'], justify='right', width=4).pack(side=tk.LEFT)
+        tk.Entry(frame, textvariable=vars['pgb'], justify='right', width=4).pack(side=tk.LEFT)
         frame.grid(row=13, column=3)
 
-        tk.Entry(root, textvariable=self._hu1, justify='right', width=10).grid(row=14, column=1)
-        tk.Entry(root, textvariable=self._hu2, justify='right', width=10).grid(row=14, column=2)
-        tk.Entry(root, textvariable=self._hu3, justify='right', width=10).grid(row=14, column=3)
-        tk.Entry(root, textvariable=self._hu4, justify='right', width=10).grid(row=14, column=4)
-        tk.Entry(root, textvariable=self._hu5, justify='right', width=10).grid(row=14, column=5)
-        tk.Entry(root, textvariable=self._hu6, justify='right', width=10).grid(row=14, column=6)
+        tk.Entry(root, textvariable=vars['hu1'], justify='right', width=10).grid(row=14, column=1)
+        tk.Entry(root, textvariable=vars['hu2'], justify='right', width=10).grid(row=14, column=2)
+        tk.Entry(root, textvariable=vars['hu3'], justify='right', width=10).grid(row=14, column=3)
+        tk.Entry(root, textvariable=vars['hu4'], justify='right', width=10).grid(row=14, column=4)
+        tk.Entry(root, textvariable=vars['hu5'], justify='right', width=10).grid(row=14, column=5)
+        tk.Entry(root, textvariable=vars['hu6'], justify='right', width=10).grid(row=14, column=6)
 
-        tk.Entry(root, textvariable=self._dk1, justify='right', width=10).grid(row=15, column=1)
-        tk.Entry(root, textvariable=self._dk2, justify='right', width=10).grid(row=15, column=2)
-        tk.Entry(root, textvariable=self._dk3, justify='right', width=10).grid(row=15, column=3)
-        tk.Entry(root, textvariable=self._dk4, justify='right', width=10).grid(row=15, column=4)
-        tk.Entry(root, textvariable=self._dk5, justify='right', width=10).grid(row=15, column=5)
-        tk.Entry(root, textvariable=self._dk6, justify='right', width=10).grid(row=15, column=6)
-
-        tk.Entry(root, textvariable=self._syge, justify='right', width=10).grid(row=16, column=1)
+        tk.Entry(root, textvariable=vars['dk1'], justify='right', width=10).grid(row=15, column=1)
+        tk.Entry(root, textvariable=vars['dk2'], justify='right', width=10).grid(row=15, column=2)
+        tk.Entry(root, textvariable=vars['dk3'], justify='right', width=10).grid(row=15, column=3)
+        tk.Entry(root, textvariable=vars['dk4'], justify='right', width=10).grid(row=15, column=4)
+        tk.Entry(root, textvariable=vars['dk5'], justify='right', width=10).grid(row=15, column=5)
+        tk.Entry(root, textvariable=vars['dk6'], justify='right', width=10).grid(row=15, column=6)
+        tk.Entry(root, textvariable=vars['syge'], justify='right', width=10).grid(row=16, column=1)
 
         # Buttons
-        tk.Button(root, text='Forrige dag', command=self.prev_day).grid(row=0, column=2)
-        tk.Button(root, text='Næste dag', command=self.next_day).grid(row=0, column=3)
-        tk.Button(root, text='Nulstil togt', command=self.reset).grid(row=0, column=6)
-        tk.Button(root, text='Udfyld resten', command=self.reset).grid(row=17, column=5)
-        tk.Button(root, text='Eksporter dag', command=self.reset).grid(row=17, column=6)
+        tk.Button(root, text='Forrige dag', command=self.controller.prev_day).grid(row=0, column=2)
+        tk.Button(root, text='Næste dag', command=self.controller.next_day).grid(row=0, column=3)
+        tk.Button(root, text='Nulstil sejlads', command=self.controller.reset).grid(row=0, column=6)
+        tk.Button(root, text='Udfyld resten', command=self.controller.fill_day).grid(row=17, column=5)
+        tk.Button(root, text='Eksporter dag', command=self.controller.export_day).grid(row=17, column=6)
 
-    def prev_day(self):
-        pass
-
-    def next_day(self):
-        pass
-
-    def reset(self):
-        pass
-
-    def update(self, model):
+    def set_screen_model(self, model):
         # set date
-        d = model.selected_date
-        date_text = f'{d.year}/{str(d.month).zfill(2)}/{str(d.day).zfill(2)}'
-        self._date.set(date_text)
-        self._skifte1.set(model.skifte1)
-        self._skifte2.set(model.skifte2)
-        self._skifte3.set(model.skifte3)
-        self._skifte4.set(model.skifte4)
-        self._skifte5.set(model.skifte5)
-        self._skifte6.set(model.skifte6)
+        for key, value in model.items():
+            self._vars[key].set(value)
 
-class Model():
+    def get_screen_model(self):
+        pass
+
+class Controller():
 
     def __init__(self):
-        self.selected_date = datetime.now()
-        self.skifte1 = 1
-        self.skifte2 = 2
-        self.skifte3 = 3
-        self.skifte4 = 1
-        self.skifte5 = 2
-        self.skifte6 = 3
+        self.view = None
 
+    def next_day(self):
+        print('next_day called')
+
+    def prev_day(self):
+        print('prev_day called')
+
+    def reset(self):
+        print('reset called')
+
+    def fill_day(self):
+        print('fill_day called')
+
+    def export_day(self):
+        print('export_day called')
+
+    def close(self):
+        print('close called')
 
 if __name__=='__main__':
     root = tk.Tk()
     root.title('Georg Stage Søvagt - version 0.1')
-    gui = Gui(root)
-    model = Model()
-    gui.update(model)
+    controller = Controller()
+    gui = Gui(root, controller)
     tk.mainloop()
