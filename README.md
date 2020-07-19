@@ -1,9 +1,8 @@
 
-Køre:
+Kør program:
 
 ```
-source venv/bin/activate
-python georgstage/interface.py
+python3 georgstage/interface.py
 ```
 
 
