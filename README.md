@@ -1,3 +1,57 @@
+# Georg Stage Vagtplanlægger 0.0.1
+
+> Hjælpeprogram til vagtplanlægning på Georg Stage
+
+## Til brugere
+
+Programmet kan installeres via pip:
+
+```
+pip install georgstage
+```
+
+### Eksempler
+
+Start UI:
+
+```
+# TODO
+```
+
+Kode eksempler:
+
+```python
+import georgstage
+```
+
+
+## Fremtidigt arbejde
+
+> Se https://trello.com/b/nId6IuH1/georg-stage  
+
+
+## Til udviklere
+
+### Sådan kører du tests
+
+Ved hjælp af make:
+
+```
+make test
+```
+
+### Sådan publicerer du en ny version
+
+Trin (kan måske forbedre):
+
+1. Opdater version and download_url felter i setup.py
+1. Kør git add + commit + push
+1. Opret ny release på GitHub (check source-code link, skal matche download_url i setup.py)
+1. Kør `python setup.py sdist`
+1. Kør `twine upload dist/* --verbose` (hvis ej installet, kør `pip install twine` først)
+
+
+## Gamle noter
 
 Kør program:
 

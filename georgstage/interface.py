@@ -272,6 +272,56 @@ class Model():
     def suggest_skifter(self, date):
         return {f'skifte_{i+1}': str(1 + i%3) for i in range(6)}
 
+
+class DaySheet:
+
+    def __init__(self, shifts=None, sick=None):
+        if shifts is not None:
+            assert(len(shifts) == 6)
+            self.shifts = shifts
+        else:
+            self.shifts = [
+                Shift(shift_no=i+1, team_no=i%3+1)
+                for i in range(6)
+            ]
+        self.sick = sick or []
+
+
+class Shift:
+
+    def __init__(self, shift_no, team_no, **duties):
+        for duty, gast in duties.items():
+            assert(gast.team_no == team_no)
+        if shift_no != 3:
+            assert('pejlegast_a' not in duties)
+            assert('pejlegast_b' not in duties)
+
+        self.shift_no = shift_no
+        self.team_no = team_no
+        self.vagthavende_elev = duties.get('vagthavende_elev')
+        self.ordonnans = duties.get('ordonnans')
+        self.udkig = duties.get('udkig')
+        self.bjaergemaers = duties.get('bjaergemaers')
+        self.rorgaenger = duties.get('rorgaenger')
+        self.udsaetningsgast_a = duties.get('udsaetningsgast_a')
+        self.udsaetningsgast_b = duties.get('udsaetningsgast_b')
+        self.udsaetningsgast_c = duties.get('udsaetningsgast_c')
+        self.udsaetningsgast_d = duties.get('udsaetningsgast_d')
+        self.udsaetningsgast_e = duties.get('udsaetningsgast_e')
+        self.pejlegast_a = duties.get('pejlegast_a')
+        self.pejlegast_b = duties.get('pejlegast_b')
+        self.hu = duties.get('hu')
+        self.daekselev_kabys = kwargs.duties('daekselev_kabys')
+
+class Gast:
+
+    def __init__(self, gast_nr=None, team_no=None):
+        self.gast_nr = gast_nr
+        self.team_no = team_no
+
+
+
+
 if __name__=='__main__':
     root = tk.Tk()
     root.title('Georg Stage Søvagt - version 0._1')
