@@ -98,8 +98,8 @@ class GeorgStage:
                 yield vagt
 
     def autofill(self, datestr):
-        vagter = self[datestr]
-        andre = []
+        current = self[datestr]
+        andre = self.get_vagter(before=datestr)
         filled_day = None
         return filled_day
 
