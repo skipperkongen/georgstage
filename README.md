@@ -10,6 +10,12 @@ Programmet kan installeres via pip:
 pip install georgstage
 ```
 
+Til lokal udvikling:
+
+```
+pip install -e .
+```
+
 ### Eksempler
 
 Start UI:

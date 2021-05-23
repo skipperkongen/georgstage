@@ -1,22 +1,10 @@
 from enum import Enum
+from dataclasses import dataclass
+from datetime import date
 
 import numpy as np
 import pandas as pd
 import pulp as P
-
-class Task(Enum):
-    VAGTHAVENDE_ELEV = 0
-    ORDONNANS = 1
-    UDKIG = 2
-    BJÆRGEMÆRS = 3
-    RORGÆNGER = 4
-    UDSÆTNINGSGAST_A = 5
-    UDSÆTNINGSGAST_B = 6
-    UDSÆTNINGSGAST_C = 7
-    UDSÆTNINGSGAST_D = 8
-    PEJLEGAST_A = 9
-    PEJLEGAST_B = 10
-    DÆKSELEV_I_KABYS = 11
 
 def print_sol(task_counts, X):
     TIDSPUNKTER = ['08 - 12', '12 - 16', '16 - 20', '20 - 24', '24 - 04', '04 - 08']
@@ -25,7 +13,7 @@ def print_sol(task_counts, X):
 
     for k in range(6):
         print(f'Vagt {TIDSPUNKTER[k]}')
-        for j in range(len(Task)):
+        for j in range(len(Activity)):
             for i in range(n_gasts):
                 x = X[i][j][k]
                 if x.varValue == 1:
@@ -36,13 +24,7 @@ def print_sol(task_counts, X):
 def team_minmax(team, size=20):
     return team*size, team*size+size
 
-def get_task_counts(df, n_gasts=60):
-    n_tasks = len(Task)
-    hist = df[df.task_no >= 0].groupby(['gast_no', 'task_no']).size()
-    stats = np.zeros((n_gasts, n_tasks)).astype(int)
-    for gast_no, task_no in hist.index:
-        stats[gast_no , task_no] = hist[gast_no, task_no]
-    return stats
+
 
 def get_instance(task_counts, vagthavende, pejlegast_b=None, sick=[], hu=[], assigned={}, n_shifts=6, pejl_shift=2, kabys_shifts=[0,1,2], team_order=[0,1,2]):
     """
