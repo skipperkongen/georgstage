@@ -91,7 +91,7 @@ Noter:
 - [rotation] pejlegast A/B, to gaster. Hvis 1,2 var sidst, så 2,3 næste gang, o.s.v.
 - [rotation] pejlegast kun 16-20 vagten
 - [rotation] Dækselev i kabys, kun 8-12 (morgenmad), 12-16 (frokost), 16-20 (aftensmad)
-- i havn:
+- hu?
 
 kontroller:
 - i havn (hvornår ankomst og afgang?) eller til søs
