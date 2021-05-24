@@ -122,7 +122,7 @@ class AutoFiller:
             Opgave.PEJLEGAST_A.value,
             Opgave.PEJLEGAST_B.value
         ]
-        opgaver_norm = [o.value for o in Opgave if o not in opgaver_spec]
+        opgaver_norm = [o.value for o in Opgave if o.value not in opgaver_spec]
 
         gaster = [gast for gast in range(1, N_GASTS+1)]
 
