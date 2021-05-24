@@ -16,16 +16,16 @@ class Opgave(Enum):
     VAGTHAVENDE_ELEV = 0
     ORDONNANS = 1
     UDKIG = 2
-    BJÆRGEMÆRS = 3
-    RORGÆNGER = 4
-    UDSÆTNINGSGAST_A = 5
-    UDSÆTNINGSGAST_B = 6
-    UDSÆTNINGSGAST_C = 7
-    UDSÆTNINGSGAST_D = 8
-    UDSÆTNINGSGAST_E = 9
+    BJAERGEMAERS = 3
+    RORGAENGER = 4
+    UDSAETNINGSGAST_A = 5
+    UDSAETNINGSGAST_B = 6
+    UDSAETNINGSGAST_C = 7
+    UDSAETNINGSGAST_D = 8
+    UDSAETNINGSGAST_E = 9
     PEJLEGAST_A = 10
     PEJLEGAST_B = 11
-    DÆKSELEV_I_KABYS = 12
+    DAEKSELEV_I_KABYS = 12
     HU = 13
     INAKTIV = 14
 
@@ -33,7 +33,6 @@ class Opgave(Enum):
 class Vagt:
     dato: str
     vagt_tid: int
-    skifte: int
     gast: int
     opgave: Opgave
 
@@ -41,7 +40,6 @@ class Vagt:
         return {
             'dato': self.dato,
             'vagt_tid': self.vagt_tid,
-            'skifte': self.skifte,
             'gast': self.gast,
             'opgave': self.opgave.name
         }
@@ -51,7 +49,6 @@ class Vagt:
         return Vagt(
             dato = d['dato'],
             vagt_tid = d['vagt_tid'],
-            skifte = d['skifte'],
             gast = d['gast'],
             opgave = Opgave[d['opgave']]
         )
@@ -104,6 +101,10 @@ class AutoFiller:
 
 
     def autofill(self, georgstage, datestr, skifter=[1,2,3,1,2,3]):
+        """
+        Limitation: vagthavende elev must be filled manually to ensure same gast
+        morning and evening.
+        """
 
         day_vagter = georgstage[datestr]
         other_vagter = list(georgstage.get_vagter(before=datestr))
@@ -113,66 +114,92 @@ class AutoFiller:
         prob = P.LpProblem('udfyld_vagter', P.LpMinimize)
 
         # Remove gasts from problem, who should not be assigned
-        opgaver_out = [Opgave.HU, Opgave.INAKTIV]
-        opgaver_in = [o.value for o in Opgave if o not in opgaver_out]
-        gaster_out = {vagt.gast for vagt in day_vagter if vagt.opgave in opgaver_out}
-        gaster_in = [gast for gast in range(1, N_GASTS+1) if gast not in gaster_out]
+        opgaver = [o.value for o in Opgave]
+        opgaver_spec = [
+            Opgave.HU.value,
+            Opgave.INAKTIV.value,
+            Opgave.DAEKSELEV_I_KABYS.value,
+            Opgave.PEJLEGAST_A.value,
+            Opgave.PEJLEGAST_B.value
+        ]
+        opgaver_norm = [o.value for o in Opgave if o not in opgaver_spec]
+
+        gaster = [gast for gast in range(1, N_GASTS+1)]
 
         # Decision variables (normal tasks)
         #   X_ijt: gast i, opgave j, hour t
-        X = P.LpVariable.dicts('X', (gaster_in, opgaver_in, VAGT_TIDER), 0, 1, P.LpBinary)
+        X = P.LpVariable.dicts('X', (gaster, opgaver, VAGT_TIDER), 0, 1, P.LpBinary)
 
         lookup = self.get_counts(day_vagter + other_vagter)
 
-        # Coefficients (task counts)
+        # Coefficients (number of times gast performed task)
         coef = {}
-        for i in gaster_in:
-            for j in opgaver_in:
+        for i in gaster:
+            for j in opgaver:
                 coef.setdefault(i, {})[j] = lookup(i, Opgave(j))
 
         # Objective function
         prob += P.lpSum([
             coef[i][j] * X[i][j][t]
-            for i in gaster_in
-            for j in opgaver_in
+            for i in gaster
+            for j in opgaver
             for t in VAGT_TIDER
         ])
 
-        # Constraints to force variables up
-
         ## preassigned day vagter must be assigned
         for vagt in day_vagter:
-            if vagt.opgave not in opgaver_out:
-                prob += X[vagt.gast][vagt.opgave.value][vagt.vagt_tid] == 1
+            prob += X[vagt.gast][vagt.opgave.value][vagt.vagt_tid] == 1
 
-        ## all tasks must be assigned exactly once in every vagttid
-        for j in opgaver_in:
+        ## all tasks except:
+        ## - HU, INACTIVE, PEJLEGAST_A, PEJLEGAST_B, DAEKSELEV_I_KABYS
+        ## must be assigned exactly once per vagt_tid
+        for j in opgaver_norm:
             for t in VAGT_TIDER:
-                prob += P.lpSum([X[i][j][t] for i in gaster_in]) == 1
+                prob += P.lpSum(
+                    [X[i][j][t]
+                    for i in gaster
+                ]) == 1
+
+        ## Pejlegaster only 16-20 vagt
+        for t in VAGT_TIDER:
+            # Set RHS to 1 if vagt_tid is 16, else 0
+            rhs = 1 if t == 16 else 0
+            prob += P.lpSum([X[i][Opgave.PEJLEGAST_A.value][t]for i in gaster]) == rhs
+            prob += P.lpSum([X[i][Opgave.PEJLEGAST_B.value][t]for i in gaster]) == rhs
+
+        ## Kabys only 8-12, 12-16 and 16-20 vagt
+        for t in VAGT_TIDER:
+            # Set RHS to 1 if vagt_tid is 16, else 0
+            rhs = 1 if t in [8, 12, 16] else 0
+            prob += P.lpSum([
+                X[i][Opgave.DAEKSELEV_I_KABYS.value][t]
+                for i in gaster
+            ]) == rhs
 
         ## gasts can have at most one task per shift
-        for i in gaster_in:
+        for i in gaster:
             for t in VAGT_TIDER:
-                prob += P.lpSum([X[i][j][t] for j in opgaver_in]) <= 1
+                prob += P.lpSum([X[i][j][t] for j in opgaver]) <= 1
 
-        ## gasts can only take tasks during their own shift
+        ## gasts can take zero tasks outside their own shift
         for idx, skifte in enumerate(skifter):
-            gaster_active = [i for i in gaster_in if self.get_skifte_for_gast(i) == skifte]
+            gaster_inactive = [i for i in gaster if self.get_skifte_for_gast(i) != skifte]
             t = VAGT_TIDER[idx]
             prob += P.lpSum([
                 X[i][j][t]
-                for i in gaster_in if i not in gaster_active
-                for j in opgaver_in
+                for i in gaster_inactive
+                for j in opgaver_norm
             ]) == 0
+
+        # Solve
         status = prob.solve()
         filled_day = []
-        for gast in gaster_in:
-            for opgave in opgaver_in:
-                for idx, vagt_tid in enumerate(VAGT_TIDER):
-                    skifte = skifter[idx]
+        for gast in gaster:
+            for opgave in opgaver:
+                for vagt_tid in VAGT_TIDER:
                     x = X[gast][opgave][vagt_tid]
                     if x.varValue == 1:
-                        filled_day.append(Vagt(datestr, vagt_tid, skifte, gast, Opgave(opgave)))
+                        filled_day.append(Vagt(datestr, vagt_tid, gast, Opgave(opgave)))
 
         stats = [lookup(vagt.gast, vagt.opgave) for vagt in filled_day]
 
