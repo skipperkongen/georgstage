@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 import os.path
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 import pandas as pd
@@ -29,6 +29,7 @@ class Opgave(Enum):
     HU = 13
     INAKTIV = 14
 
+
 @dataclass
 class Vagt:
     dato: str
@@ -52,6 +53,13 @@ class Vagt:
             gast = d['gast'],
             opgave = Opgave[d['opgave']]
         )
+
+
+@dataclass
+class FillResult:
+    status: int
+    vagter: List[Vagt]
+    stats: List[int]
 
 
 def load(filein):
@@ -188,22 +196,22 @@ class AutoFiller:
             prob += P.lpSum([
                 X[i][j][t]
                 for i in gaster_inactive
-                for j in opgaver_norm
+                for j in opgaver
             ]) == 0
 
         # Solve
         status = prob.solve()
-        filled_day = []
+        vagter = []
         for gast in gaster:
             for opgave in opgaver:
                 for vagt_tid in VAGT_TIDER:
                     x = X[gast][opgave][vagt_tid]
                     if x.varValue == 1:
-                        filled_day.append(Vagt(datestr, vagt_tid, gast, Opgave(opgave)))
+                        vagter.append(Vagt(datestr, vagt_tid, gast, Opgave(opgave)))
 
-        stats = [lookup(vagt.gast, vagt.opgave) for vagt in filled_day]
+        stats = [lookup(vagt.gast, vagt.opgave) for vagt in vagter]
 
-        return status, zip(filled_day, stats)
+        return FillResult(status=status, vagter=vagter, stats=stats)
 
 
 class GeorgStage:
@@ -262,10 +270,12 @@ class GeorgStage:
 
     def autofill(self, datestr):
         """
-        Returns a filled day, which can then be set using gs['SOME_DATE'] = filled_day.
+        Returns a FillResult
         """
-        status, solution = self._auto_filler.autofill(self, datestr)
-        return status, solution
+        return self._auto_filler.autofill(self, datestr)
 
-    def save(self, fout):
+    def to_dataframe(self):
+        return pd.DataFrame([v.to_dict() for v in self.get_vagter()])
+
+    def save(self, abspath):
         pass
