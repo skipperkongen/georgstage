@@ -62,14 +62,6 @@ class FillResult:
     stats: List[int]
 
 
-def load(filein):
-    df = pd.read_csv(filein)
-    vagter = {}
-    for dato, grp in df.groupby('dato'):
-        vagter[dato] = [Vagt.from_dict(row) for idx, row in grp.iterrows()]
-    return GeorgStage(vagter)
-
-
 class AutoFiller:
 
     def __init__(self):
@@ -277,5 +269,7 @@ class GeorgStage:
     def to_dataframe(self):
         return pd.DataFrame([v.to_dict() for v in self.get_vagter()])
 
-    def save(self, abspath):
-        pass
+    @staticmethod
+    def from_dataframe(df):
+        vagter = [Vagt.from_dict(row) for idx, row in df.iterrows()]
+        return GeorgStage(vagter)
