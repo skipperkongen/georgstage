@@ -2,7 +2,8 @@
 
 > Version 0.1
 
-Hjælpeprogram til vagtplanlægning ombord på Georg Stage (søvagter).
+Hjælpeprogram til vagtplanlægning ombord på Georg Stage (søvagter). Matematikken bag programmet benytter lineær programming (LP) til at optimere vagterne, således at alle opgaver varetages, samtidigt med
+at opgaverne fordeles mellem gasterne så fair som muligt.
 
 ## Installation
 
@@ -31,7 +32,6 @@ Hvis du kan kode Python, kan du bruge Georg Stages API via kode.
 ```python
 from georgstage import GeorgStage, Opgave, Vagt
 import pandas as pd
-import pulp as P
 
 # initialiser GeorgStage med kode
 vagter = [
