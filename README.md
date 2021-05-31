@@ -29,7 +29,7 @@ Hvis du kan kode Python, kan du bruge Georg Stages API via kode.
 *Auto-udfyldning:*
 
 ```python
-from georgstage import GeorgStage, Opgave, Vagt, AutoFiller
+from georgstage import GeorgStage, Opgave, Vagt
 import pandas as pd
 import pulp as P
 
