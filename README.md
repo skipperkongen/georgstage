@@ -24,7 +24,7 @@ Kommer snart...
 
 ### Kode eksempler
 
-Hvis du kan kode Python, kan du bruge GeorgStage API'et via kode.
+Hvis du kan kode Python, kan du bruge Georg Stages API via kode.
 
 *Auto-udfyldning:*
 
