@@ -100,12 +100,12 @@ class AutoFiller:
             return 3
 
 
-    def autofill(self, georgstage, datestr, skifter=[1,2,3,1,2,3]):
+    def autofill(self, georgstage, dt, skifter=[1,2,3,1,2,3]):
         """
         Limitation: vagthavende elev must be filled manually to ensure same gast
         morning and evening.
         """
-
+        datestr = str(dt)
         day_vagter = georgstage[datestr]
         other_vagter = list(georgstage.get_vagter(before=datestr))
         lookup = self.get_counts(day_vagter + other_vagter)
@@ -209,14 +209,10 @@ class AutoFiller:
 class GeorgStage:
 
     def __init__(self, vagter, auto_filler=AutoFiller()):
-        if type(vagter) == list:
-            self._vagter = {}
-            for vagt in vagter:
-                self._vagter.setdefault(vagt.dato, []).append(vagt)
-        elif type(vagter) == dict:
-            self._vagter = vagter
-        else:
-            raise TypeError('Argument vagter must have type List[Vagt] or Dict[str,Vagt]')
+        self._vagter = {}
+        for vagt in vagter:
+            assert(type(vagt) == Vagt)
+            self._vagter.setdefault(vagt.dato, []).append(vagt)
         self._auto_filler = auto_filler
 
     def __len__(self):
@@ -225,13 +221,15 @@ class GeorgStage:
         """
         return len(self._vagter)
 
-    def __getitem__(self, datestr):
+    def __getitem__(self, dt):
+        datestr = str(dt)
         return self._vagter.get(datestr) or []
 
-    def __setitem__(self, datestr, vagter):
+    def __setitem__(self, dt, vagter):
         """
         Set list of Vagter object on a given day
         """
+        datestr = str(dt)
         self._vagter[datestr] = vagter
 
     def __delitem__(self, datestr):
@@ -260,11 +258,11 @@ class GeorgStage:
             for vagt in values:
                 yield vagt
 
-    def autofill(self, datestr):
+    def autofill(self, dt):
         """
         Returns a FillResult
         """
-        return self._auto_filler.autofill(self, datestr)
+        return self._auto_filler.autofill(self, str(dt))
 
     def to_dataframe(self):
         return pd.DataFrame([v.to_dict() for v in self.get_vagter()])
