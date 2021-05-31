@@ -1,8 +1,10 @@
-# Georg Stage Vagtplanlægger 0.0.1
+# Georg Stage vagtplanlægger
 
-> Hjælpeprogram til vagtplanlægning på Georg Stage
+> Version 0.1
 
-## Til brugere
+Hjælpeprogram til vagtplanlægning ombord på Georg Stage (søvagter).
+
+## Installation
 
 GeorgStage kan installeres via pip:
 
@@ -16,18 +18,15 @@ Til lokal udvikling:
 pip install -e .
 ```
 
-### Brugervejledning
+## Brugervejledning
 
 Kommer snart...
 
-
 ### Kode eksempler
 
-Denne sektion er for Python programmører, som ønsker at bruge GeorgStages API
-via kode.
+Hvis du kan kode Python, kan du bruge GeorgStage API'et via kode.
 
-
-Auto-udfyldning:
+*Auto-udfyldning:*
 
 ```python
 from georgstage import GeorgStage, Opgave, Vagt, AutoFiller
@@ -54,7 +53,7 @@ for dt in pd.date_range(start='2021-05-01', end='2021-05-14', closed=None).date:
 print(f'Antal dage = {len(gs)}')
 ```
 
-Load og save:
+*Load og save:*
 
 ```python
 # Create gs from other gs
@@ -71,19 +70,23 @@ df_vagter = pd.read_csv('vagter.csv')
 gs4 = GeorgStage.from_dataframe(df_vagter)
 ```
 
-Diverse:
+*Diverse:*
 
 ```python
+# Eksporter som dataframe (Pandas)
 gs.to_dataframe()
+
+# Eksporter som liste af vagter
 gs.get_vagter()
+
+# Eksporter datoer
 gs.get_datoer()
 ```
-
 
 ## Regler vedr. vagter på Georg Stage
 
 
-Noter om søvagter:
+Regler for søvagter, som gælder delvist for ankervagter:
 
 - Elever er organiseret i 3 skifter (holod) med 20 gaster (elever) på hver
   - Skifte 1: gaster 1-20
