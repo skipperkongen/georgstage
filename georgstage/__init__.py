@@ -267,6 +267,15 @@ class GeorgStage:
     def to_dataframe(self):
         return pd.DataFrame([v.to_dict() for v in self.get_vagter()])
 
+    def save(self, filepath):
+        df = self.to_dataframe()
+        df.to_csv(filepath, index=False)
+
+    @staticmethod
+    def load(filepath):
+        df = pd.read_csv(filepath)
+        return GeorgStage.from_dataframe(df)
+
     @staticmethod
     def from_dataframe(df):
         vagter = [Vagt.from_dict(row) for idx, row in df.iterrows()]
