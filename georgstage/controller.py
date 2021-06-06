@@ -17,6 +17,9 @@ class Controller(object):
         result = self.model.incr()
         self.view.value_var.set(result)
 
+    def new_plan(self):
+        print('New plan')
+
     def open_file(self, filepath):
         print(f'loading file: {filepath}')
 
@@ -25,6 +28,9 @@ class Controller(object):
 
     def fill_day(self):
         print('Fill day clicked')
+
+    def pick_date(self):
+        print('Pick day')
 
 if __name__ == '__main__':
     app = Controller()
