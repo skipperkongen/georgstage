@@ -72,6 +72,10 @@ class View(tk.Tk):
         menu.add_cascade(label="Funktioner", menu=function_menu)
         function_menu.add_command(label="Udfyld resten automatisk", command=self.controller.fill_day)
 
+        help_menu = tk.Menu(menu)
+        menu.add_cascade(label="Hjælp", menu=help_menu)
+        help_menu.add_command(label="Om Georg Stage vagtplanlægger", command=self._on_help)
+
     def _make_labels(self):
         tk.Label(self.main_frm, text='Dato (YYYY/MM/DD)').grid(row=0, column=0, sticky=tk.E)
         tk.Label(self.main_frm, text='Skifte').grid(row=1, column=0, sticky=tk.E)
@@ -184,6 +188,8 @@ class View(tk.Tk):
         except:
             return False
 
+    def _on_help(self):
+        messagebox.showinfo(title='Hjælp', message='Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage')
 
     def _on_button_push(self):
         #print('Button pushed')
@@ -192,7 +198,7 @@ class View(tk.Tk):
             # save state of currently active date (if )
             pass
         else:
-            messagebox.showwarning(title='Ugyldig dato', message='Den dato du har tastet er ugyldig. Benyt venligst formatet YYYY/MM/DD.')
+            messagebox.showwarning(title='Ugyldig dato', message='Ugyldigt datoformat. Benyt venligst formatet YYYY/MM/DD, f.eks. 1935/4/24.')
 
     def _on_open(self):
         filename = filedialog.askopenfilename()
