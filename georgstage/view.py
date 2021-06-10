@@ -1,6 +1,7 @@
 from datetime import datetime
+from dateutil.parser import parse
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, simpledialog
 from tkinter import ttk
 
 from tkcalendar import Calendar
@@ -11,8 +12,8 @@ from georgstage import Opgave
 class View(tk.Tk):
     """docstring for View."""
 
-    PAD = 20
-    WIDTH = 10
+    PAD = 30
+    WIDTH = 12
     LABELS = [
         (Opgave.VAGTHAVENDE_ELEV, 'Vagthavende elev'),
         (Opgave.ORDONNANS, 'Ordonnans'),
@@ -25,9 +26,7 @@ class View(tk.Tk):
         (Opgave.UDSAETNINGSGAST_D,'Udsætningsgast D'),
         (Opgave.UDSAETNINGSGAST_E,'Udsætningsgast E'),
         ((Opgave.PEJLEGAST_A, Opgave.PEJLEGAST_B), 'Pejlegast A/B'),
-        (Opgave.DAEKSELEV_I_KABYS, 'Dækselev i kabys'),
-        (Opgave.HU, 'HU'),
-        (Opgave.INAKTIV, 'Fraværende')
+        (Opgave.DAEKSELEV_I_KABYS, 'Dækselev i kabys')
     ]
     START_TIDER = [0, 4, 8, 12, 16, 20]
     TIDSPUNKTER = ['00 - 04', '04 - 08', '08 - 12', '12 - 16', '16 - 20', '20 - 24']
@@ -42,6 +41,7 @@ class View(tk.Tk):
         self._make_main_frame()
         self._make_menu()
         self._make_labels()
+        self._make_dropdown()
         self._make_entries()
         self._make_buttons()
         print([k for k in self._vars.keys()])
@@ -52,7 +52,7 @@ class View(tk.Tk):
 
 
     def _make_main_frame(self):
-        self.main_frm = ttk.Frame(self)
+        self.main_frm = tk.Frame(self, bg='White')
         self.main_frm.pack(padx=self.PAD, pady=self.PAD, side=tk.TOP)
 
     def _make_var(self, key):
@@ -71,64 +71,38 @@ class View(tk.Tk):
         function_menu = tk.Menu(menu)
         menu.add_cascade(label="Funktioner", menu=function_menu)
         function_menu.add_command(label="Udfyld resten automatisk", command=self.controller.fill_day)
+        function_menu.add_command(label="Vis statistik", command=self.controller.show_stats)
 
         help_menu = tk.Menu(menu)
         menu.add_cascade(label="Hjælp", menu=help_menu)
         help_menu.add_command(label="Om Georg Stage vagtplanlægger", command=self._on_help)
 
     def _make_labels(self):
-        tk.Label(self.main_frm, text='Dato (YYYY/MM/DD)').grid(row=0, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, text='Skifte').grid(row=1, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, text='Vagt').grid(row=2, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, text='').grid(row=3, column=0, sticky=tk.E)
+
+        tk.Label(self.main_frm, bg='White', text='Tidspunkt').grid(row=1, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='').grid(row=2, column=0, sticky=tk.E)
         for i, (_, label_text) in enumerate(self.LABELS):
-            tk.Label(self.main_frm, text=label_text).grid(row=i+4, column=0, sticky=tk.E)
+            tk.Label(self.main_frm, bg='White', text=label_text).grid(row=i+2, column=0, sticky=tk.E)
         for i, tidspunkt in enumerate(self.TIDSPUNKTER):
-            tk.Label(self.main_frm, text=tidspunkt, width=self.WIDTH).grid(row=2, column=i+1, sticky=tk.E)
+            tk.Label(self.main_frm, bg='White', text=tidspunkt, width=self.WIDTH).grid(row=1, column=i+1, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='').grid(row=len(self.LABELS)+3, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Ude').grid(row=len(self.LABELS)+4, column=0, sticky=tk.E)
 
     def _make_entries(self):
 
-        # Dato
-        def is_date(str):
-            try:
-                datetime.strptime(str, '%Y/%m/%d')
-                print('Date ok: ', str)
-                return True
-            except:
-                print('Date NOT ok', str)
-                return False
-        ttk.Entry(
-            self.main_frm,
-            justify='center',
-            textvariable=self._make_var('DATO'),
-            width=self.WIDTH
-        ).grid(row=0, column=1, sticky=tk.E)
-
-        # skifter
-        def is_skifte_or_empty(str):
-            return str == '' or str.isdigit() and int(str) in [1,2,3]
-        vcmd = (self.register(is_skifte_or_empty), '%P')
-        for i in range(self.COLS):
-            tidspunkt = self.START_TIDER[i]
-            ttk.Entry(
-                self.main_frm,
-                justify='right',
-                validate='key',
-                validatecommand=vcmd,
-                textvariable=self._make_var(f'SKIFTE_{tidspunkt}'),
-                width=self.WIDTH
-            ).grid(row=1, column=i+1, sticky=tk.E)
-
         # vagter, except pejlegast
         def is_gast_or_empty(str):
-            print('is_gast received:', str)
-            return str == '' or str.isdigit() and 0 < int(str) <= 60
+            valid_date = self._vars['DATO'].get() != '-'
+            if not valid_date:
+                messagebox.showwarning(title='Ingen dato valgt', message='Før du kan indtaste gaster, skal du vælge en dato fra dropdown eller oprette en ny dato ved at trykke på "Opret dato"')
+
+            return valid_date and (str == '' or str.isdigit()) and 0 < int(str) <= 60
         vcmd = (self.register(is_gast_or_empty), '%P')
         for i, (opgave, label_text) in enumerate(self.LABELS):
             if opgave == (Opgave.PEJLEGAST_A, Opgave.PEJLEGAST_B):
                 # Pejlegase entries
-                pejlegast_frame = ttk.Frame(self.main_frm)
-                ttk.Entry(
+                pejlegast_frame = tk.Frame(self.main_frm)
+                tk.Entry(
                     pejlegast_frame,
                     validate='key',
                     validatecommand=vcmd,
@@ -136,7 +110,7 @@ class View(tk.Tk):
                     justify='right',
                     width=4
                 ).pack(side=tk.LEFT)
-                ttk.Entry(
+                tk.Entry(
                     pejlegast_frame,
                     validate='key',
                     validatecommand=vcmd,
@@ -144,61 +118,81 @@ class View(tk.Tk):
                     justify='right',
                     width=4
                 ).pack(side=tk.LEFT)
-                pejlegast_frame.grid(row=14, column=4)
+                pejlegast_frame.grid(row=12, column=4)
             elif opgave == Opgave.DAEKSELEV_I_KABYS:
                 for j in range (3):
                     start_tid = self.START_TIDER[j+2]
-                    ent = ttk.Entry(
+                    ent = tk.Entry(
                         self.main_frm,
                         validate='key',
                         validatecommand=vcmd,
                         justify='right',
                         textvariable=self._make_var(f'{opgave.name}_{start_tid}'),
                         width = self.WIDTH
-                    ).grid(row=i+4, column=j+3, sticky=tk.E)
+                    ).grid(row=i+2, column=j+3, sticky=tk.E)
             else:
                 for j in range(self.COLS):
                     start_tid = self.START_TIDER[j]
-                    ent = ttk.Entry(
+                    ent = tk.Entry(
                         self.main_frm,
                         validate='key',
                         validatecommand=vcmd,
                         justify='right',
                         textvariable=self._make_var(f'{opgave.name}_{start_tid}'),
                         width = self.WIDTH
-                    ).grid(row=i+4, column=j+1, sticky=tk.E)
+                    ).grid(row=i+2, column=j+1, sticky=tk.E)
+            for i in range(self.COLS):
+                tidspunkt = self.START_TIDER[i]
+                tk.Entry(
+                    self.main_frm,
+                    justify='right',
+                    validate='key',
+                    validatecommand=vcmd,
+                    textvariable=self._make_var(f'UDE_{tidspunkt}'),
+                    width=self.WIDTH
+                ).grid(row=len(self.LABELS)+4, column=i+1, sticky=tk.E)
 
 
 
         #tk.Entry(pejlegast_frame, textvariable=tk.StringVar(), justify='right', width=4).pack(side=tk.LEFT)
         #tk.Entry(pejlegast_frame, textvariable=tk.StringVar(), justify='right', width=4).pack(side=tk.LEFT)
+
+    def _make_dropdown(self):
+        self.date_list = ['-']
+        var = self._make_var('DATO')
+        var.set(self.date_list[0])
+        var.trace('w', self._on_date_selected)
+        listbox = tk.OptionMenu(
+            self.main_frm,
+            var,
+            *self.date_list
+        ).grid(row=0, column=0, sticky=tk.E)
 
     def _make_buttons(self):
-        self.btn_dato = ttk.Button(
+        self.btn_create_date = tk.Button(
             self.main_frm,
-            text='Skift dato',
-            command=self._on_button_push
+            text='Opret dato',
+            command=self._on_create_date
         )
-        self.btn_dato.grid(row=0, column=2, sticky=tk.E)
-
-    def _is_date(self, str):
-        try:
-            datetime.strptime(str, '%Y/%m/%d')
-            return True
-        except:
-            return False
+        self.btn_create_date.grid(row=0, column=1, sticky=tk.W)
 
     def _on_help(self):
         messagebox.showinfo(title='Hjælp', message='Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage')
 
-    def _on_button_push(self):
-        #print('Button pushed')
-        value = self._vars['DATO'].get()
-        if self._is_date(value):
-            # save state of currently active date (if )
-            pass
-        else:
-            messagebox.showwarning(title='Ugyldig dato', message='Ugyldigt datoformat. Benyt venligst formatet YYYY/MM/DD, f.eks. 1935/4/24.')
+    def _on_date_selected(self, a, b, c):
+        print ('Valgt dato:', self._vars['DATO'].get())
+
+    def _on_create_date(self):
+        input_dato = simpledialog.askstring(
+            "Opret dato", "Indtast dato som skal oprettes",
+            parent=self.main_frm)
+        try:
+            dt = parse(input_dato).date()
+            created = self.controller.create_date(dt)
+            if not created:
+                messagebox.showwarning(title='Ugyldig dato', message='Dato findes i forvejen')
+        except Exception as e:
+            messagebox.showwarning(title='Ugyldig dato', message='Ugyldigt datoformat. Benyt venligst formatet YYYY-MM-DD, f.eks. 1935-4-24.')
 
     def _on_open(self):
         filename = filedialog.askopenfilename()

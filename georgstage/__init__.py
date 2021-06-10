@@ -3,6 +3,8 @@ from enum import Enum
 import os.path
 from typing import Tuple, List
 
+from datetime import date
+from dateutil.parser import parse
 import numpy as np
 import pandas as pd
 import pulp as P
@@ -26,16 +28,18 @@ class Opgave(Enum):
     PEJLEGAST_A = 10
     PEJLEGAST_B = 11
     DAEKSELEV_I_KABYS = 12
-    HU = 13
-    INAKTIV = 14
+    UDE = 13
 
 
 @dataclass
 class Vagt:
-    dato: str
+    dato: date
     vagt_tid: int
     gast: int
     opgave: Opgave
+
+    def __post_init__(self):
+        self.dato = parse(str(self.dato)).date()
 
     def to_dict(self):
         return {
@@ -116,8 +120,7 @@ class AutoFiller:
         # Remove gasts from problem, who should not be assigned
         opgaver = [o.value for o in Opgave]
         opgaver_spec = [
-            Opgave.HU.value,
-            Opgave.INAKTIV.value,
+            Opgave.UDE.value,
             Opgave.DAEKSELEV_I_KABYS.value,
             Opgave.PEJLEGAST_A.value,
             Opgave.PEJLEGAST_B.value
@@ -151,7 +154,7 @@ class AutoFiller:
             prob += X[vagt.gast][vagt.opgave.value][vagt.vagt_tid] == 1
 
         ## all tasks except:
-        ## - HU, INACTIVE, PEJLEGAST_A, PEJLEGAST_B, DAEKSELEV_I_KABYS
+        ## - UDE, PEJLEGAST_A, PEJLEGAST_B, DAEKSELEV_I_KABYS
         ## must be assigned exactly once per vagt_tid
         for j in opgaver_norm:
             for t in VAGT_TIDER:
@@ -222,18 +225,19 @@ class GeorgStage:
         return len(self._vagter)
 
     def __getitem__(self, dt):
-        datestr = str(dt)
-        return self._vagter.get(datestr) or []
+        dt = parse(str(dt)).date()
+        return self._vagter.get(dt) or []
 
     def __setitem__(self, dt, vagter):
         """
         Set list of Vagter object on a given day
         """
-        datestr = str(dt)
-        self._vagter[datestr] = vagter
+        dt = parse(str(dt)).date()
+        self._vagter[dt] = vagter
 
-    def __delitem__(self, datestr):
-        del self._vagter[datestr]
+    def __delitem__(self, dt):
+        dt = parse(str(dt)).date()
+        del self._vagter[dt]
 
     def get_datoer(self):
         """
@@ -247,16 +251,18 @@ class GeorgStage:
         """
         return True
 
-    def get_vagter(self, before=None, exclude=[]):
+    def get_vagter(self, before=None):
         """
         Returns all vagter objects, with optional filtering.
         """
-        if type(exclude) == str:
-            exclude = [exclude]
+        before = before or parse('9999/9/9')
+        before = parse(str(before)).date()
+        result = []
         for dato, values in self._vagter.items():
-            if (before and dato >= before) or dato in exclude: continue
+            if (before and dato >= before): continue
             for vagt in values:
-                yield vagt
+                result.append(vagt)
+        return result
 
     def autofill(self, dt):
         """

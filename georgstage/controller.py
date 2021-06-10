@@ -20,6 +20,10 @@ class Controller(object):
     def new_plan(self):
         print('New plan')
 
+    def create_date(self, dt):
+        print('Creating date')
+        return False
+
     def open_file(self, filepath):
         print(f'loading file: {filepath}')
 
@@ -28,6 +32,9 @@ class Controller(object):
 
     def fill_day(self):
         print('Fill day clicked')
+
+    def show_stats(self):
+        print('Show stats clicked')
 
     def pick_date(self):
         print('Pick day')
