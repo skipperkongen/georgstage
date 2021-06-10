@@ -98,7 +98,7 @@ class View(tk.Tk):
         def is_gast_or_empty(str):
             valid_date = self._vars['DATO'].get() != '-'
             if not valid_date:
-                messagebox.showwarning(title='Ingen dato valgt', message='Før du kan indtaste gaster, skal du vælge en dato fra dropdown eller oprette en ny dato ved at trykke på "Opret dato"')
+                messagebox.showwarning(title='Ingen dato valgt', message='Før du kan indtaste gaster, skal du vælge en dato fra dropdown eller oprette en ny dato under "Rediger" -> "Opret dato"')
 
             return valid_date and (str == '' or str.isdigit()) and 0 < int(str) <= 60
         vcmd = (self.register(is_gast_or_empty), '%P')
