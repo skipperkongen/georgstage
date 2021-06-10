@@ -43,7 +43,6 @@ class View(tk.Tk):
         self._make_labels()
         self._make_dropdown()
         self._make_entries()
-        self._make_buttons()
         print([k for k in self._vars.keys()])
 
     def main(self):
@@ -68,6 +67,11 @@ class View(tk.Tk):
         file_menu.add_command(label="Åben", command=self._on_open)
         file_menu.add_command(label="Gem som", command=self._on_save_as)
 
+        rediger_menu = tk.Menu(menu)
+        menu.add_cascade(label="Rediger", menu=rediger_menu)
+        rediger_menu.add_command(label="Opret ny dato", command=self._on_create_date)
+        rediger_menu.add_command(label="Slet valgte dato", command=self._on_delete_date)
+
         function_menu = tk.Menu(menu)
         menu.add_cascade(label="Funktioner", menu=function_menu)
         function_menu.add_command(label="Udfyld resten automatisk", command=self.controller.fill_day)
@@ -79,14 +83,14 @@ class View(tk.Tk):
 
     def _make_labels(self):
 
-        tk.Label(self.main_frm, bg='White', text='Tidspunkt').grid(row=1, column=0, sticky=tk.E)
+        #tk.Label(self.main_frm, bg='White', text='Tidspunkt').grid(row=1, column=0, sticky=tk.E)
         tk.Label(self.main_frm, bg='White', text='').grid(row=2, column=0, sticky=tk.E)
         for i, (_, label_text) in enumerate(self.LABELS):
             tk.Label(self.main_frm, bg='White', text=label_text).grid(row=i+2, column=0, sticky=tk.E)
         for i, tidspunkt in enumerate(self.TIDSPUNKTER):
             tk.Label(self.main_frm, bg='White', text=tidspunkt, width=self.WIDTH).grid(row=1, column=i+1, sticky=tk.E)
         tk.Label(self.main_frm, bg='White', text='').grid(row=len(self.LABELS)+3, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Ude').grid(row=len(self.LABELS)+4, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Ude (f.eks. 1, 2, 3)').grid(row=len(self.LABELS)+4, column=0, sticky=tk.E)
 
     def _make_entries(self):
 
@@ -168,23 +172,23 @@ class View(tk.Tk):
             *self.date_list
         ).grid(row=0, column=0, sticky=tk.E)
 
-    def _make_buttons(self):
-        self.btn_create_date = tk.Button(
-            self.main_frm,
-            text='Opret dato',
-            command=self._on_create_date
-        )
-        self.btn_create_date.grid(row=0, column=1, sticky=tk.W)
-
     def _on_help(self):
         messagebox.showinfo(title='Hjælp', message='Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage')
 
     def _on_date_selected(self, a, b, c):
         print ('Valgt dato:', self._vars['DATO'].get())
 
+    def _on_delete_date(self):
+        dato = self._vars['DATO'].get()
+        if dato != '-':
+            do_delete = messagebox.askokcancel("Slet dato",f"Er du sikker på at du vil slette datoen {dato}?")
+            print(do_delete)
+        else:
+            messagebox.showwarning("Slet dato",f"Der er ikke valgt nogen dato")
+
     def _on_create_date(self):
         input_dato = simpledialog.askstring(
-            "Opret dato", "Indtast dato som skal oprettes",
+            "Opret dato", "Indtast dato som skal oprettes (YYYY-MM-DD)",
             parent=self.main_frm)
         try:
             dt = parse(input_dato).date()
