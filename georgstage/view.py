@@ -1,11 +1,15 @@
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.parser import parse
+import logging
+import pdb
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 from tkinter import ttk
 import traceback
 
 from georgstage import Opgave
+
+logger = logging.getLogger()
 
 
 class View(tk.Tk):
@@ -42,26 +46,39 @@ class View(tk.Tk):
         self._make_labels()
         self._make_dropdown()
         self._make_entries()
-        print([k for k in self._vars.keys()])
 
     def main(self):
-        print('In main of view ')
+        logger.info('In main of view ')
         self.mainloop()
 
-    def update(self, date_list, current_date, vagter):
+    def update(self):
+        logger.info('Updating')
+        logger.info('Resetting and updating variables')
+        self._reset_vars()
+        vagter = self.controller.get_vagter(self.current_date.get())
+        for vagt in vagter:
+            key = (vagt.opgave, vagt.vagt_tid)
+            self._vars[key].set(str(vagt.gast))
+
         # refresh date list
+        logger.info('Updating date list')
+        datoer = self.controller.get_datoer()
         format_date = lambda d: d.isoformat() if type(d) == datetime.date else str(d)
-        date_list = sorted([format_date(d) for d in date_list])
-        current_date = format_date(current_date)
+        date_list = sorted([format_date(d) for d in datoer])
         self._dropdown['menu'].delete(0, 'end')
         for dato in date_list:
             self._dropdown['menu'].add_command(label=dato, command=tk._setit(self.current_date, dato))
-        self.current_date.set(current_date)
 
     def _make_vars(self):
         self._vars = {}
         self.current_date = tk.StringVar(self)
         self.current_date.trace('w', self._on_date_selected)
+        self.previous_date = tk.StringVar(self)
+
+    def _reset_vars(self):
+        logger.info('Resetting variables')
+        for var in self._vars.values():
+            var.set('')
 
     def _make_main_frame(self):
         self.main_frm = tk.Frame(self, bg='White')
@@ -109,11 +126,12 @@ class View(tk.Tk):
 
         # vagter, except pejlegast
         def is_gast_or_empty(str):
-            valid_date = self.current_date.get() != '-'
-            if not valid_date:
+            try:
+                valid_date = parse(self.current_date.get())
+                return str == '' or (str.isdigit() and 0 < int(str) <= 60)
+            except:
                 messagebox.showwarning(title='Ingen dato valgt', message='Før du kan indtaste gaster, skal du vælge en dato fra dropdown eller oprette en ny dato under "Rediger" -> "Opret dato"')
-
-            return valid_date and (str == '' or str.isdigit()) and 0 < int(str) <= 60
+                return False
         vcmd = (self.register(is_gast_or_empty), '%P')
         for i, (opgave, label_text) in enumerate(self.LABELS):
             if opgave == (Opgave.PEJLEGAST_A, Opgave.PEJLEGAST_B):
@@ -123,7 +141,7 @@ class View(tk.Tk):
                     pejlegast_frame,
                     validate='key',
                     validatecommand=vcmd,
-                    textvariable=self._make_var(Opgave.PEJLEGAST_A.name),
+                    textvariable=self._make_var((Opgave.PEJLEGAST_A, 16)),
                     justify='right',
                     width=4
                 ).pack(side=tk.LEFT)
@@ -131,7 +149,7 @@ class View(tk.Tk):
                     pejlegast_frame,
                     validate='key',
                     validatecommand=vcmd,
-                    textvariable=self._make_var(Opgave.PEJLEGAST_B.name),
+                    textvariable=self._make_var((Opgave.PEJLEGAST_B, 16)),
                     justify='right',
                     width=4
                 ).pack(side=tk.LEFT)
@@ -144,7 +162,7 @@ class View(tk.Tk):
                         validate='key',
                         validatecommand=vcmd,
                         justify='right',
-                        textvariable=self._make_var(f'{opgave.name}_{start_tid}'),
+                        textvariable=self._make_var((opgave, start_tid)),
                         width = self.WIDTH
                     ).grid(row=i+2, column=j+3, sticky=tk.E)
             else:
@@ -155,7 +173,7 @@ class View(tk.Tk):
                         validate='key',
                         validatecommand=vcmd,
                         justify='right',
-                        textvariable=self._make_var(f'{opgave.name}_{start_tid}'),
+                        textvariable=self._make_var((opgave, start_tid)),
                         width = self.WIDTH
                     ).grid(row=i+2, column=j+1, sticky=tk.E)
             for i in range(self.COLS):
@@ -165,7 +183,7 @@ class View(tk.Tk):
                     justify='right',
                     validate='key',
                     validatecommand=vcmd,
-                    textvariable=self._make_var(f'UDE_{tidspunkt}'),
+                    textvariable=self._make_var((Opgave.UDE, start_tid)),
                     width=self.WIDTH
                 ).grid(row=len(self.LABELS)+4, column=i+1, sticky=tk.E)
 
@@ -188,27 +206,41 @@ class View(tk.Tk):
         messagebox.showinfo(title='Hjælp', message='Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage')
 
     def _on_date_selected(self, a, b, c):
-        print ('Valgt dato:', self.current_date.get())
+        logger.info (f'Dato changed {self.previous_date.get()} -> {self.current_date.get()}')
+        try:
+            previous_dt = parse(self.previous_date.get())
+            current_dt = parse(self.current_date.get())
+            export_vars = [(k,v.get()) for k,v in self._vars.items()]
+            self.controller.persist_view(previous_dt, export_vars)
+            self.update()
+        except Exception as e:
+            # previous date was not a date
+            logger.exception(e)
+        # update previous date
+        self.previous_date.set(self.current_date.get())
 
     def _on_delete_date(self):
         dato = self.current_date.get()
         if dato != '-':
             do_delete = messagebox.askokcancel("Slet dato",f"Er du sikker på at du vil slette datoen {dato}?")
-            print(do_delete)
+            logger.info(f'Delete? {do_deletes}')
         else:
             messagebox.showwarning("Slet dato",f"Der er ikke valgt nogen dato")
 
     def _on_create_date(self):
         input_dato = simpledialog.askstring(
             "Opret dato", "Indtast dato som skal oprettes (YYYY-MM-DD)",
-            parent=self.main_frm)
+            parent=self.main_frm,
+            initialvalue=date.today().isoformat())
         try:
             dt = parse(input_dato).date()
             created = self.controller.create_date(dt)
+            self.current_date.set(input_dato)
+            self.update()
             if not created:
                 messagebox.showwarning(title='Ugyldig dato', message='Dato findes i forvejen')
         except Exception as e:
-            traceback.print_exc()
+            logger.exception(e)
             messagebox.showwarning(title='Ugyldig dato', message='Ugyldigt datoformat. Benyt venligst formatet YYYY-MM-DD, f.eks. 1935-4-24.')
 
     def _on_open(self):

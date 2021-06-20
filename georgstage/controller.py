@@ -1,5 +1,9 @@
+import logging
+
 from georgstage.model import GeorgStage, Vagt, Opgave, AutoFiller
 from georgstage.view import View
+
+logger = logging.getLogger()
 
 class Controller(object):
     """docstring for Controller."""
@@ -9,54 +13,68 @@ class Controller(object):
         self.view = View(self)
 
     def main(self):
-        print('In main of controller')
+        logger.info('In main of controller')
         self.view.main()
 
     def new_plan(self):
-        print('New plan')
+        logger.info('New plan')
 
     def create_date(self, dt):
-        print(f'Creating date: {dt} ({type(dt)})')
+        logger.info(f'Creating date: {dt} ({type(dt)})')
         datoer = self.model.get_datoer()
         # Check that date is new date
         if dt in datoer:
             return False
         else:
             self.model[dt] = []
-            self.view.update(self.model.get_datoer(), dt, [])
             return True
 
     def change_date(self):
-        print('Changing day')
+        logger.info('Changing day')
+
+    def persist_view(self, dt, export_vars):
+        logger.info('Persisting view')
+        # translate dt and export_vars to vagter
+        vagter = [
+            Vagt(dato=dt, vagt_tid=vagt_tid, gast=int(gast), opgave=opgave)
+            for (opgave, vagt_tid), gast in export_vars
+            if gast.isdigit()
+        ]
+        self.model[dt] = vagter
+
+    def get_vagter(self, dt):
+        logger.info('Getting vagter for date')
+        vagter = self.model[dt]
+        return vagter
+
+    def get_datoer(self):
+        logger.info('Getting datoer')
+        return self.model.get_datoer()
 
     def open_file(self, filepath):
-        print(f'loading file: {filepath}')
+        logger.info(f'loading file: {filepath}')
         try:
             gs = GeorgStage.load(filepath)
             self.model = gs
             return True
         except Exception as e:
-            print(e)
+            logger.exception(e)
             return False
 
     def save_file(self, filepath):
-        print(f'Saving file: {filepath}')
+        logger.info(f'Saving file: {filepath}')
         try:
             self.model.save(filepath)
             return True
         except Exception as e:
-            print(e)
+            logger.exception(e)
             return False
 
     def fill_day(self):
-        print('Fill day clicked')
+        logger.info('Fill day clicked')
 
     def show_stats(self):
-        print('Show stats clicked')
+        logger.info('Show stats clicked')
 
     def pick_date(self):
-        print('Pick day')
-
-if __name__ == '__main__':
-    app = Controller()
-    app.main()
+        logger.info('Pick day')
