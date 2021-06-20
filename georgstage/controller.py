@@ -53,13 +53,8 @@ class Controller(object):
 
     def open_file(self, filepath):
         logger.info(f'loading file: {filepath}')
-        try:
-            gs = GeorgStage.load(filepath)
-            self.model = gs
-            return True
-        except Exception as e:
-            logger.exception(e)
-            return False
+        gs = GeorgStage.load(filepath)
+        self.model = gs
 
     def save_file(self, filepath):
         logger.info(f'Saving file: {filepath}')

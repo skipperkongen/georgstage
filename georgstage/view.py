@@ -7,10 +7,12 @@ from tkinter import filedialog, messagebox, simpledialog
 from tkinter import ttk
 import traceback
 
-from georgstage import Opgave
+from georgstage.model import Opgave
 
 logger = logging.getLogger()
 
+
+NO_DATE = '-'
 
 class View(tk.Tk):
     """docstring for View."""
@@ -46,6 +48,7 @@ class View(tk.Tk):
         self._make_labels()
         self._make_dropdown()
         self._make_entries()
+        #pdb.set_trace()
 
     def main(self):
         logger.info('In main of view ')
@@ -53,13 +56,7 @@ class View(tk.Tk):
 
     def update(self):
         logger.info('Updating')
-        logger.info('Resetting and updating variables')
         self._reset_vars()
-        vagter = self.controller.get_vagter(self.current_date.get())
-        for vagt in vagter:
-            key = (vagt.opgave, vagt.vagt_tid)
-            self._vars[key].set(str(vagt.gast))
-
         # refresh date list
         logger.info('Updating date list')
         datoer = self.controller.get_datoer()
@@ -68,6 +65,16 @@ class View(tk.Tk):
         self._dropdown['menu'].delete(0, 'end')
         for dato in date_list:
             self._dropdown['menu'].add_command(label=dato, command=tk._setit(self.current_date, dato))
+
+        logger.info('Resetting and updating variables')
+        if self.current_date.get() == NO_DATE:
+            self.current_date.set(date_list[-1])
+        vagter = self.controller.get_vagter(self.current_date.get())
+        for vagt in vagter:
+            key = (vagt.opgave, vagt.vagt_tid)
+            #pdb.set_trace()
+            self._vars[key].set(str(vagt.gast))
+
 
     def _make_vars(self):
         self._vars = {}
@@ -93,9 +100,8 @@ class View(tk.Tk):
 
         file_menu = tk.Menu(menu)
         menu.add_cascade(label="Filer", menu=file_menu)
-        file_menu.add_command(label="Ny plan", command=self.controller.new_plan)
-        file_menu.add_command(label="Åben", command=self._on_open)
-        file_menu.add_command(label="Gem som", command=self._on_save_as)
+        file_menu.add_command(label="Åben vagtplan", command=self._on_open)
+        file_menu.add_command(label="Gem vagtplan", command=self._on_save_as)
 
         rediger_menu = tk.Menu(menu)
         menu.add_cascade(label="Rediger", menu=rediger_menu)
@@ -193,7 +199,7 @@ class View(tk.Tk):
         #tk.Entry(pejlegast_frame, textvariable=tk.StringVar(), justify='right', width=4).pack(side=tk.LEFT)
 
     def _make_dropdown(self):
-        date_list = ['-']
+        date_list = [NO_DATE]
         self.current_date.set(date_list[0])
         self._dropdown = tk.OptionMenu(
             self.main_frm,
@@ -221,7 +227,7 @@ class View(tk.Tk):
 
     def _on_delete_date(self):
         dato = self.current_date.get()
-        if dato != '-':
+        if dato != NO_DATE:
             do_delete = messagebox.askokcancel("Slet dato",f"Er du sikker på at du vil slette datoen {dato}?")
             logger.info(f'Delete? {do_deletes}')
         else:
@@ -244,9 +250,13 @@ class View(tk.Tk):
             messagebox.showwarning(title='Ugyldig dato', message='Ugyldigt datoformat. Benyt venligst formatet YYYY-MM-DD, f.eks. 1935-4-24.')
 
     def _on_open(self):
-        filename = filedialog.askopenfilename()
-        success = self.controller.open_file(filename)
-        if not success:
+        logger.info('Opening file')
+        try:
+            filename = filedialog.askopenfilename()
+            self.controller.open_file(filename)
+            self.update()
+        except Exception as e:
+            logger.exception(e)
             messagebox.showerror(title='Fejl', message='Der opstod en fejl under forsøget på at åbne din vagtplan. Check filformatet og prøv igen.')
 
     def _on_save_as(self):
