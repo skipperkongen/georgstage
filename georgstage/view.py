@@ -3,8 +3,7 @@ from dateutil.parser import parse
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 from tkinter import ttk
-
-from tkcalendar import Calendar
+import traceback
 
 from georgstage import Opgave
 
@@ -37,7 +36,7 @@ class View(tk.Tk):
         super(View, self).__init__()
         self.controller = controller
         self.title('Georg Stage vagtplanlægger')
-        self._vars = {}
+        self._make_vars()
         self._make_main_frame()
         self._make_menu()
         self._make_labels()
@@ -49,13 +48,27 @@ class View(tk.Tk):
         print('In main of view ')
         self.mainloop()
 
+    def update(self, date_list, current_date, vagter):
+        # refresh date list
+        format_date = lambda d: d.isoformat() if type(d) == datetime.date else str(d)
+        date_list = sorted([format_date(d) for d in date_list])
+        current_date = format_date(current_date)
+        self._dropdown['menu'].delete(0, 'end')
+        for dato in date_list:
+            self._dropdown['menu'].add_command(label=dato, command=tk._setit(self.current_date, dato))
+        self.current_date.set(current_date)
+
+    def _make_vars(self):
+        self._vars = {}
+        self.current_date = tk.StringVar(self)
+        self.current_date.trace('w', self._on_date_selected)
 
     def _make_main_frame(self):
         self.main_frm = tk.Frame(self, bg='White')
         self.main_frm.pack(padx=self.PAD, pady=self.PAD, side=tk.TOP)
 
     def _make_var(self, key):
-        return self._vars.setdefault(key, tk.StringVar())
+        return self._vars.setdefault(key, tk.StringVar(self))
 
     def _make_menu(self):
         menu = tk.Menu(self)
@@ -96,7 +109,7 @@ class View(tk.Tk):
 
         # vagter, except pejlegast
         def is_gast_or_empty(str):
-            valid_date = self._vars['DATO'].get() != '-'
+            valid_date = self.current_date.get() != '-'
             if not valid_date:
                 messagebox.showwarning(title='Ingen dato valgt', message='Før du kan indtaste gaster, skal du vælge en dato fra dropdown eller oprette en ny dato under "Rediger" -> "Opret dato"')
 
@@ -162,24 +175,23 @@ class View(tk.Tk):
         #tk.Entry(pejlegast_frame, textvariable=tk.StringVar(), justify='right', width=4).pack(side=tk.LEFT)
 
     def _make_dropdown(self):
-        self.date_list = ['-']
-        var = self._make_var('DATO')
-        var.set(self.date_list[0])
-        var.trace('w', self._on_date_selected)
-        listbox = tk.OptionMenu(
+        date_list = ['-']
+        self.current_date.set(date_list[0])
+        self._dropdown = tk.OptionMenu(
             self.main_frm,
-            var,
-            *self.date_list
-        ).grid(row=0, column=0, sticky=tk.E)
+            self.current_date,
+            *date_list
+        )
+        self._dropdown.grid(row=0, column=0, sticky=tk.E)
 
     def _on_help(self):
         messagebox.showinfo(title='Hjælp', message='Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage')
 
     def _on_date_selected(self, a, b, c):
-        print ('Valgt dato:', self._vars['DATO'].get())
+        print ('Valgt dato:', self.current_date.get())
 
     def _on_delete_date(self):
-        dato = self._vars['DATO'].get()
+        dato = self.current_date.get()
         if dato != '-':
             do_delete = messagebox.askokcancel("Slet dato",f"Er du sikker på at du vil slette datoen {dato}?")
             print(do_delete)
@@ -196,12 +208,19 @@ class View(tk.Tk):
             if not created:
                 messagebox.showwarning(title='Ugyldig dato', message='Dato findes i forvejen')
         except Exception as e:
+            traceback.print_exc()
             messagebox.showwarning(title='Ugyldig dato', message='Ugyldigt datoformat. Benyt venligst formatet YYYY-MM-DD, f.eks. 1935-4-24.')
 
     def _on_open(self):
         filename = filedialog.askopenfilename()
-        self.controller.open_file(filename)
+        success = self.controller.open_file(filename)
+        if not success:
+            messagebox.showerror(title='Fejl', message='Der opstod en fejl under forsøget på at åbne din vagtplan. Check filformatet og prøv igen.')
 
     def _on_save_as(self):
         filename = filedialog.asksaveasfilename()
-        self.controller.save_file(filename)
+        success = self.controller.save_file(filename)
+        if success:
+            messagebox.showinfo(title='Fil gemt', message='Din vagtplan er blevet gemt')
+        else:
+            messagebox.showerror(title='Fejl', message='Der opstod en fejl under forsøget på at gemme din vagtplan')
