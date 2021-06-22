@@ -217,6 +217,16 @@ class View(tk.Tk):
         )
         self._dropdown.grid(row=0, column=0, sticky=tk.E)
 
+    def show_can_not_fill(self):
+        messagebox.showwarning("Udfyld resten",f"Vagtplanen kan ikke udfyldes.")
+
+    def show_ask_skifte(self, vagt_tid=0):
+        skifte = simpledialog.askinteger(
+            "Angiv skifte", f"Hvilket skifte har vagt fra klokken {vagt_tid}",
+            parent=self.main_frm
+        )
+        return skifte
+
     def _on_help(self):
         messagebox.showinfo(title='Hjælp', message='Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage')
 

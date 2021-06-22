@@ -58,6 +58,16 @@ class Controller(object):
         ]
         self.model[dt] = vagter
 
+    def _guess_skifter(self, vagter):
+        logger.info('Guessing skifter')
+        guesses = [None,None,None,None,None,None]
+        for vagt in vagter:
+            skifte = 1 + vagt.gast // 20
+            idx = vagt.vagt_tid // 4
+            guesses[idx] = skifte
+        return guesses
+
+
     def get_vagter(self, dt):
         logger.info('Getting vagter for date')
         vagter = self.model[dt]
@@ -79,7 +89,23 @@ class Controller(object):
 
     def fill_day(self):
         logger.info('Fill day clicked')
-        self.persist_view()
+        try:
+            dt = parse(self.view.get_current_date())
+            self.persist_view()
+            vagter = self.get_vagter(dt)
+            skifter = self._guess_skifter(vagter)
+            logger.info(f'Guesses: {skifter}')
+            for i, skifte in enumerate(skifter):
+                if skifte is None:
+                    skifte = self.view.show_ask_skifte(vagt_tid=i*4)
+                    if skifte not in (1,2,3):
+                        raise ValueError(f'Skifte {skifte} not one of 1, 2, 3')
+                    skifter[i] = skifte
+            logger.info(f'Skifter: {skifter}')
+        except Exception as e:
+            logger.exception(e)
+            self.view.show_can_not_fill()
+
 
     def show_stats(self):
         logger.info('Show stats clicked')
