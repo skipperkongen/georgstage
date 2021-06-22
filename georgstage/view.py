@@ -115,7 +115,8 @@ class View(tk.Tk):
         rediger_menu = tk.Menu(menu)
         menu.add_cascade(label="Rediger", menu=rediger_menu)
         rediger_menu.add_command(label="Opret ny dato", command=self._on_create_date)
-        rediger_menu.add_command(label="Slet valgte dato", command=self._on_delete_date)
+        rediger_menu.add_command(label="Nulstil valgte dato", command=self.controller.reset_date)
+        rediger_menu.add_command(label="Slet valgte dato", command=self.controller.delete_date)
 
         function_menu = tk.Menu(menu)
         menu.add_cascade(label="Funktioner", menu=function_menu)
@@ -192,7 +193,7 @@ class View(tk.Tk):
                         width = self.WIDTH
                     ).grid(row=i+2, column=j+1, sticky=tk.E)
             for i in range(self.COLS):
-                tidspunkt = self.START_TIDER[i]
+                start_tid = self.START_TIDER[i]
                 tk.Entry(
                     self.main_frm,
                     justify='right',
@@ -241,14 +242,17 @@ class View(tk.Tk):
             # previous date was not a date
             logger.exception(e)
 
+    def show_confirm_delete_date(self, dt):
+        return messagebox.askokcancel("Slet dato",f"Er du sikker på at du vil slette den datoen {dt.isoformat()}?")
 
-    def _on_delete_date(self):
-        dato = self.current_date.get()
-        if dato != NO_DATE:
-            do_delete = messagebox.askokcancel("Slet dato",f"Er du sikker på at du vil slette datoen {dato}?")
-            logger.info(f'Delete? {do_deletes}')
-        else:
-            messagebox.showwarning("Slet dato",f"Der er ikke valgt nogen dato")
+    def show_confirm_reset_date(self, dt):
+        return messagebox.askokcancel("Slet dato",f"Er du sikker på at du vil nulstille datoen {dt.isoformat()}?")
+
+    def show_could_not_delete_date(self):
+        messagebox.showwarning("Slet dato",f"Kunne ikke slette dato")
+
+    def show_could_not_reset_date(self):
+        messagebox.showwarning("Slet dato",f"Kunne ikke nulstille dato")
 
     def _on_create_date(self):
         try:

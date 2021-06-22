@@ -22,6 +22,27 @@ class Controller(object):
     def new_plan(self):
         logger.info('New plan')
 
+    def delete_date(self):
+        current_date = self.view.get_current_date()
+        try:
+            dt = parse(current_date).date()
+            if self.view.show_confirm_delete_date(dt):
+                del self.model[dt]
+                self.view.update()
+        except:
+            self.view.show_could_not_delete_date()
+
+
+    def reset_date(self):
+        current_date = self.view.get_current_date()
+        try:
+            dt = parse(current_date).date()
+            if self.view.show_confirm_reset_date(dt):
+                self.model[dt] = []
+                self.view.update()
+        except:
+            self.view.show_could_not_reset_date()
+
     def create_date(self, dt):
         logger.info(f'Creating date: {dt}')
         datoer = self.model.get_datoer()
