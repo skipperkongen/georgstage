@@ -1,11 +1,12 @@
 from datetime import datetime, date
-from dateutil.parser import parse
 import logging
 import pdb
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 from tkinter import ttk
 import traceback
+
+from dateutil.parser import parse
 
 from georgstage.model import Opgave
 
@@ -75,8 +76,14 @@ class View(tk.Tk):
             #pdb.set_trace()
             self._vars[key].set(str(vagt.gast))
 
-    def export_vars(self):
+    def get_vars(self):
         return [(k,v.get()) for k,v in self._vars.items()]
+
+    def get_previous_date(self):
+        return self.previous_date.get()
+
+    def get_current_date(self):
+        return self.current_date.get()
 
     def _make_vars(self):
         self._vars = {}
@@ -214,17 +221,16 @@ class View(tk.Tk):
         messagebox.showinfo(title='Hjælp', message='Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage')
 
     def _on_date_selected(self, a, b, c):
+        if self.current_date.get() == NO_DATE: return
         logger.info (f'Dato changed {self.previous_date.get()} -> {self.current_date.get()}')
         try:
-            previous_dt = parse(self.previous_date.get())
-            current_dt = parse(self.current_date.get())
-            self.controller.persist_view(previous_dt)
+            self.controller.change_date()
             self.update()
+            self.previous_date.set(self.current_date.get())
         except Exception as e:
             # previous date was not a date
             logger.exception(e)
-        # update previous date
-        self.previous_date.set(self.current_date.get())
+
 
     def _on_delete_date(self):
         dato = self.current_date.get()
@@ -235,17 +241,20 @@ class View(tk.Tk):
             messagebox.showwarning("Slet dato",f"Der er ikke valgt nogen dato")
 
     def _on_create_date(self):
-        input_dato = simpledialog.askstring(
-            "Opret dato", "Indtast dato som skal oprettes (YYYY-MM-DD)",
-            parent=self.main_frm,
-            initialvalue=date.today().isoformat())
         try:
+            input_dato = simpledialog.askstring(
+                "Opret dato", "Indtast dato som skal oprettes (YYYY-MM-DD)",
+                parent=self.main_frm,
+                initialvalue=date.today().isoformat()
+            )
             dt = parse(input_dato).date()
             created = self.controller.create_date(dt)
-            self.current_date.set(input_dato)
-            self.update()
-            if not created:
+            if created:
+                self.current_date.set(input_dato)
+                self.update()
+            else:
                 messagebox.showwarning(title='Ugyldig dato', message='Dato findes i forvejen')
+
         except Exception as e:
             logger.exception(e)
             messagebox.showwarning(title='Ugyldig dato', message='Ugyldigt datoformat. Benyt venligst formatet YYYY-MM-DD, f.eks. 1935-4-24.')
@@ -261,11 +270,11 @@ class View(tk.Tk):
             messagebox.showerror(title='Fejl', message='Der opstod en fejl under forsøget på at åbne din vagtplan. Check filformatet og prøv igen.')
 
     def _on_save_as(self):
-        filename = filedialog.asksaveasfilename(defaultextension='gsv')
-        current_dt = parse(self.current_date.get())
-        self.controller.persist_view(current_dt)
-        success = self.controller.save_file(filename)
-        if success:
-            messagebox.showinfo(title='Fil gemt', message='Din vagtplan er blevet gemt')
-        else:
+        try:
+            filename = filedialog.asksaveasfilename(defaultextension='gsv', filetypes=[('Georg Stage Vagtplan', '*.gsv')])
+            if filename is not None:
+                self.controller.save_file(filename)
+                messagebox.showinfo(title='Fil gemt', message='Din vagtplan er blevet gemt')
+        except Exception as e:
+            logger.exception(e)
             messagebox.showerror(title='Fejl', message='Der opstod en fejl under forsøget på at gemme din vagtplan')
