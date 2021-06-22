@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import logging
 import pdb
 import tkinter as tk
@@ -119,7 +119,7 @@ class View(tk.Tk):
 
         function_menu = tk.Menu(menu)
         menu.add_cascade(label="Funktioner", menu=function_menu)
-        function_menu.add_command(label="Udfyld resten automatisk", command=self.controller.fill_day)
+        function_menu.add_command(label="Udfyld resten automatisk", command=self.controller.autofill)
         function_menu.add_command(label="Vis statistik", command=self.controller.show_stats)
 
         help_menu = tk.Menu(menu)
@@ -252,10 +252,16 @@ class View(tk.Tk):
 
     def _on_create_date(self):
         try:
+            datoer = self.controller.get_datoer()
+            if len(datoer) > 0:
+                max_dt = max(datoer)
+                initial_value = max_dt + timedelta(days=1)
+            else:
+                initial_value = date.today()
             input_dato = simpledialog.askstring(
                 "Opret dato", "Indtast dato som skal oprettes (YYYY-MM-DD)",
                 parent=self.main_frm,
-                initialvalue=date.today().isoformat()
+                initialvalue=initial_value.isoformat()
             )
             dt = parse(input_dato).date()
             created = self.controller.create_date(dt)

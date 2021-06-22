@@ -87,7 +87,7 @@ class Controller(object):
         self.persist_view()
         self.model.save(filepath)
 
-    def fill_day(self):
+    def autofill(self):
         logger.info('Fill day clicked')
         try:
             dt = parse(self.view.get_current_date())
@@ -102,6 +102,13 @@ class Controller(object):
                         raise ValueError(f'Skifte {skifte} not one of 1, 2, 3')
                     skifter[i] = skifte
             logger.info(f'Skifter: {skifter}')
+            fill_result = self.model.autofill(dt, skifter)
+            logger.info(fill_result)
+            if fill_result.status != 1:
+                raise ValueError(f'Vagtplan not optimal')
+            self.model[dt] = fill_result.vagter
+            self.view.update()
+
         except Exception as e:
             logger.exception(e)
             self.view.show_can_not_fill()

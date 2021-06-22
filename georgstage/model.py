@@ -264,11 +264,11 @@ class GeorgStage:
                 result.append(vagt)
         return result
 
-    def autofill(self, dt):
+    def autofill(self, dt, skifter=[1,2,3,1,2,3]):
         """
         Returns a FillResult
         """
-        return self._auto_filler.autofill(self, str(dt))
+        return self._auto_filler.autofill(self, dt, skifter)
 
     def to_dataframe(self):
         rows = [v.to_dict() for v in self.get_vagter()]
