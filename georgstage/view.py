@@ -136,7 +136,7 @@ class View(tk.Tk):
         for i, tidspunkt in enumerate(self.TIDSPUNKTER):
             tk.Label(self.main_frm, bg='White', text=tidspunkt, width=self.WIDTH).grid(row=1, column=i+1, sticky=tk.E)
         tk.Label(self.main_frm, bg='White', text='').grid(row=len(self.LABELS)+3, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Ude (f.eks. 1, 2, 3)').grid(row=len(self.LABELS)+4, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Ude/HU').grid(row=len(self.LABELS)+4, column=0, sticky=tk.E)
 
     def _make_entries(self):
 
