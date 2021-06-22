@@ -32,9 +32,10 @@ class Controller(object):
     def change_date(self):
         logger.info('Changing day')
 
-    def persist_view(self, dt, export_vars):
+    def persist_view(self, dt):
         logger.info('Persisting view')
         # translate dt and export_vars to vagter
+        export_vars = self.view.export_vars()
         vagter = [
             Vagt(dato=dt, vagt_tid=vagt_tid, gast=int(gast), opgave=opgave)
             for (opgave, vagt_tid), gast in export_vars

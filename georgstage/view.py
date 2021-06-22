@@ -75,6 +75,8 @@ class View(tk.Tk):
             #pdb.set_trace()
             self._vars[key].set(str(vagt.gast))
 
+    def export_vars(self):
+        return [(k,v.get()) for k,v in self._vars.items()]
 
     def _make_vars(self):
         self._vars = {}
@@ -216,8 +218,7 @@ class View(tk.Tk):
         try:
             previous_dt = parse(self.previous_date.get())
             current_dt = parse(self.current_date.get())
-            export_vars = [(k,v.get()) for k,v in self._vars.items()]
-            self.controller.persist_view(previous_dt, export_vars)
+            self.controller.persist_view(previous_dt)
             self.update()
         except Exception as e:
             # previous date was not a date
@@ -252,7 +253,7 @@ class View(tk.Tk):
     def _on_open(self):
         logger.info('Opening file')
         try:
-            filename = filedialog.askopenfilename()
+            filename = filedialog.askopenfilename(filetypes=[('Georg Stage Vagtplan', '*.gsv')])
             self.controller.open_file(filename)
             self.update()
         except Exception as e:
@@ -260,7 +261,9 @@ class View(tk.Tk):
             messagebox.showerror(title='Fejl', message='Der opstod en fejl under forsøget på at åbne din vagtplan. Check filformatet og prøv igen.')
 
     def _on_save_as(self):
-        filename = filedialog.asksaveasfilename()
+        filename = filedialog.asksaveasfilename(defaultextension='gsv')
+        current_dt = parse(self.current_date.get())
+        self.controller.persist_view(current_dt)
         success = self.controller.save_file(filename)
         if success:
             messagebox.showinfo(title='Fil gemt', message='Din vagtplan er blevet gemt')
