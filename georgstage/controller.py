@@ -5,7 +5,6 @@ from dateutil.parser import parse
 from georgstage.model import GeorgStage, Vagt, Opgave, AutoFiller
 from georgstage.view import View, NO_DATE
 
-
 logger = logging.getLogger()
 
 class Controller(object):
