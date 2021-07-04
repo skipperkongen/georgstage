@@ -231,6 +231,57 @@ class View(tk.Tk):
         )
         self._dropdown.grid(row=0, column=0, sticky=tk.E)
 
+    def show_info(self, header, text):
+        messagebox.showinfo(
+            header,
+            text,
+            parent=self.main_frm
+        )
+
+    def show_warning(self, header, text):
+        messagebox.showwarning(
+            header,
+            text,
+            parent=self.main_frm
+        )
+
+    def ask_open_file(self, **kwargs):
+        return filedialog.askopenfilename(
+            **kwargs,
+            parent=self.main_frm
+        )
+
+    def ask_save_file_as(self, **kwargs):
+        return filedialog.asksaveasfilename(
+            **kwargs,
+            parent=self.main_frm
+        )
+
+    def ask_number(self, header, text):
+        number = simpledialog.askinteger(
+            header,
+            text,
+            parent=self.main_frm
+        )
+        return number
+
+    def ask_string(self, header, text):
+        str = simpledialog.askstring(
+            header,
+            text,
+            parent=self.main_frm
+        )
+        return str
+
+
+    def ask_consent(self, header, text):
+        return messagebox.askokcancel(
+            header,
+            text,
+            parent=self.main_frm
+        )
+
+
     def _on_date_selected(self, a, b, c):
         if self.current_date.get() == NO_DATE: return
         logger.info (f'Dato changed {self.previous_date.get()} -> {self.current_date.get()}')
@@ -241,28 +292,6 @@ class View(tk.Tk):
         except Exception as e:
             # previous date was not a date
             logger.exception(e)
-
-    def show_info(self, header, text):
-        messagebox.showinfo(header, text)
-
-    def show_warning(self, header, text):
-        messagebox.showwarning(header, text)
-
-    def ask_open_file(self, **kwargs):
-        return filedialog.askopenfilename(**kwargs)
-
-    def ask_save_file_as(self, **kwargs):
-        return filedialog.asksaveasfilename(**kwargs)
-
-    def ask_number(self, header, text):
-        number = simpledialog.askinteger(
-            header, text,
-            parent=self.main_frm
-        )
-        return number
-
-    def ask_consent(self, header, text):
-        return messagebox.askokcancel(header, text)
 
     def _on_create_date(self):
         try:
