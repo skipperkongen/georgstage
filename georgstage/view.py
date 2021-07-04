@@ -12,7 +12,6 @@ from georgstage.model import Opgave
 
 logger = logging.getLogger()
 
-
 NO_DATE = '-'
 
 class View(tk.Tk):
@@ -71,13 +70,31 @@ class View(tk.Tk):
         if self.current_date.get() == NO_DATE:
             self.current_date.set(date_list[-1])
         vagter = self.controller.get_vagter(self.current_date.get())
+        # ugly, ugly HU handling
+        hu_vagter = {}
         for vagt in vagter:
             key = (vagt.opgave, vagt.vagt_tid)
             #pdb.set_trace()
-            self._vars[key].set(str(vagt.gast))
+            if vagt.opgave == Opgave.UDE:
+                hu_vagter.setdefault(key, []).append(str(vagt.gast))
+            else:
+                text = str(vagt.gast)
+                self._vars[key].set(text)
+        for key, gaster in hu_vagter.items():
+            text = ', '.join(gaster)
+            self._vars[key].set(text)
+
+    def _get_vars_helper(self):
+        for k,v in self._vars.items():
+            text = v.get().strip()
+            if k[0] == Opgave.UDE:
+                for sub_text in text.split(','):
+                    yield k, sub_text.strip()
+            else:
+                yield k, text
 
     def get_vars(self):
-        return [(k,v.get()) for k,v in self._vars.items()]
+        return list(self._get_vars_helper())
 
     def get_previous_date(self):
         return self.previous_date.get()
@@ -197,13 +214,9 @@ class View(tk.Tk):
                 tk.Entry(
                     self.main_frm,
                     justify='right',
-                    validate='key',
-                    validatecommand=vcmd,
                     textvariable=self._make_var((Opgave.UDE, start_tid)),
                     width=self.WIDTH
                 ).grid(row=len(self.LABELS)+4, column=i+1, sticky=tk.E)
-
-
 
         #tk.Entry(pejlegast_frame, textvariable=tk.StringVar(), justify='right', width=4).pack(side=tk.LEFT)
         #tk.Entry(pejlegast_frame, textvariable=tk.StringVar(), justify='right', width=4).pack(side=tk.LEFT)
