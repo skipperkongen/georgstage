@@ -1,6 +1,7 @@
-import datetime
+from datetime import datetime, date, timedelta
 from dateutil.parser import parse
 import logging
+import pdb
 
 from georgstage.model import GeorgStage, Vagt, Opgave, AutoFiller
 from georgstage.view import View, NO_DATE
@@ -29,7 +30,7 @@ class Controller(object):
             text = f"Er du sikker på at du vil slette {dt.isoformat()}?"
             if self.view.ask_consent(header, text):
                 del self.model[dt]
-                self.view.update()
+                self.view.update(self.model)
         except:
             self.view.show_warning("Fejl", "Kunne ikke slette dato")
 
@@ -42,60 +43,79 @@ class Controller(object):
             text = f"Er du sikker på at du vil nulstille {dt.isoformat()}?"
             if self.view.ask_consent(header, text):
                 self.model[dt] = []
-                self.view.update()
+                self.view.update(self.model)
         except:
             self.view.show_warning("Fejl", "Kunne ikke nulstille datoen")
 
     def guess_pejlegast_a(self, dt):
-        yesterday = dt - datetime.timedelta(days=1)
+        yesterday = dt - timedelta(days=1)
         logger.info(f'{dt}, {yesterday}')
         logger.info(f'Inspecting vagter {yesterday}: {self.model[yesterday]}')
         for vagt in self.model[yesterday]:
             if vagt.opgave == Opgave.PEJLEGAST_B:
                 logger.info(vagt)
-                return Vagt(dato=dt, vagt_tid=16, gast=vagt.gast, opgave=Opgave.PEJLEGAST_A)
+                return Vagt(dato=dt, vagt_tid=12, gast=vagt.gast, opgave=Opgave.PEJLEGAST_A)
 
 
-    def create_date(self, dt):
-        logger.info(f'Creating date: {dt}')
+    def create_date(self):
+        logger.info(f'Creating date')
         datoer = self.model.get_datoer()
-        # Check that date is new date
-        if dt in datoer:
-            return False
+        if len(datoer) > 0:
+            max_dt = max(datoer)
+            initial_value = max_dt + timedelta(days=1)
         else:
-            vagter = []
-            # try to fill in pejlegast A as B from yesterday
-            pejlegast_a = self.guess_pejlegast_a(dt)
-            if pejlegast_a is not None:
-                vagter.append(pejlegast_a)
-            self.model[dt] = vagter
-            return True
-
-    def change_date(self):
-        logger.info(f'Changing date')
-        old_date = self.view.get_previous_date()
+            initial_value = date.today()
+        input_dato = self.view.ask_string(
+            title="Opret dato",
+            prompt="Indtast dato som skal oprettes (YYYY-MM-DD)",
+            initial_value=initial_value.isoformat()
+        )
         try:
-            dt = parse(old_date)
-            self.persist_view(dt)
+            new_dt = parse(input_dato).date()
         except:
-            logger.info('Not persisting, because no previous date')
+            self.view.show_warning(
+                title='Fejl',
+                message='Ugyldigt datoformat. Benyt venligst formatet YYYY-MM-DD, f.eks. 1935-4-24.'
+            )
+            return
+        if new_dt in datoer:
+            self.view.show_warning(
+                title='Fejl',
+                message='Dato findes i forvejen'
+            )
+            return
+        vagter = []
+        # try to fill in pejlegast A as B from yesterday
+        pejlegast_a = self.guess_pejlegast_a(new_dt)
+        if pejlegast_a is not None:
+            vagter.append(pejlegast_a)
+        self.model[new_dt] = vagter
+        self.model.set_current_dato(new_dt)
+        self.view.update(self.model)
 
 
-    def persist_view(self, dt=None):
+    def change_date(self, new_date):
+        logger.info(f'Changing date')
+        self.persist_view()
+        self.model.set_current_dato(new_date)
+        self.view.update(self.model)
+
+
+    def persist_view(self):
         logger.info('Persisting view')
         # translate dt and export_vars to vagter
-        if self.view.get_current_date() == NO_DATE:
-            logger.info('Nothing to persist')
+        dt = self.model.get_current_dato()
+        if dt is None:
+            logger.info('Current date not set, persist skipped')
             return
         export_vars = self.view.get_vars()
-        if dt is None:
-            dt = parse(self.view.get_current_date())
         vagter = [
             Vagt(dato=dt, vagt_tid=vagt_tid, gast=int(gast), opgave=opgave)
             for (opgave, vagt_tid), gast in export_vars
             if gast.isdigit()
         ]
         self.model[dt] = vagter
+
 
     def _guess_skifter(self, vagter):
         logger.info('Guessing skifter')
@@ -114,7 +134,7 @@ class Controller(object):
             logger.info(f'loading file: {filepath}')
             gs = GeorgStage.load(filepath)
             self.model = gs
-            self.view.update()
+            self.view.update(self.model)
         except Exception as e:
             logger.exception(e)
             self.view.show_warning('Fejl', 'Der opstod en fejl under forsøget på at åbne din vagtplan. Check filformatet og prøv igen.')
@@ -138,27 +158,18 @@ class Controller(object):
         text = 'Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage'
         self.view.show_info(header, text)
 
-    def get_vagter(self, dt):
-        logger.info('Getting vagter for date')
-        vagter = self.model[dt]
-        return vagter
-
-    def get_datoer(self):
-        logger.info('Getting datoer')
-        return self.model.get_datoer()
-
     def autofill(self):
         logger.info('Fill day clicked')
         try:
-            dt = parse(self.view.get_current_date())
+            dt = self.model.get_current_dato()
             self.persist_view()
-            vagter = self.get_vagter(dt)
+            vagter = self.model[dt]
             skifter = self._guess_skifter(vagter)
             logger.info(f'Guesses: {skifter}')
             for i, skifte in enumerate(skifter):
                 if skifte is None:
                     header = "Angiv skifte"
-                    text = f"Hvilket skifte har vagt fra klokken {i*4}"
+                    text = f"Hvilket skifte har vagt fra klokken {str(i*4).zfill(2)} - {str((i+1)*4).zfill(2)}"
                     skifte = self.view.ask_number(header, text)
                     if skifte not in (1,2,3):
                         raise ValueError(f'Skifte {skifte} not one of 1, 2, 3')
@@ -168,8 +179,9 @@ class Controller(object):
             logger.info(fill_result)
             if fill_result.status != 1:
                 raise ValueError(f'Vagtplan not optimal')
+            #pdb.set_trace()
             self.model[dt] = fill_result.vagter
-            self.view.update()
+            self.view.update(self.model)
 
         except Exception as e:
             logger.exception(e)
@@ -179,6 +191,3 @@ class Controller(object):
     def show_stats(self):
         logger.info('Show stats clicked')
         self.view.show_info('Stats', 'Statistikvisning er ikke implementeret endnu')
-
-    def pick_date(self):
-        logger.info('Pick day')

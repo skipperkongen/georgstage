@@ -38,6 +38,7 @@ class View(tk.Tk):
     ROWS = len(LABELS)
     COLS = 6
 
+
     def __init__(self, controller):
         super(View, self).__init__()
         self.controller = controller
@@ -48,28 +49,27 @@ class View(tk.Tk):
         self._make_labels()
         self._make_dropdown()
         self._make_entries()
-        #pdb.set_trace()
+
 
     def main(self):
         logger.info('In main of view ')
         self.mainloop()
 
-    def update(self):
+
+    def update(self, model):
         logger.info('Updating')
+        dt = model.get_current_dato()
+        logger.info(type(dt))
         self._reset_vars()
         # refresh date list
         logger.info('Updating date list')
-        datoer = self.controller.get_datoer()
-        format_date = lambda d: d.isoformat() if type(d) == datetime.date else str(d)
-        date_list = sorted([format_date(d) for d in datoer])
+        datoer = model.get_datoer()
+        date_list = sorted([d.isoformat() for d in datoer])
         self._dropdown['menu'].delete(0, 'end')
         for dato in date_list:
             self._dropdown['menu'].add_command(label=dato, command=tk._setit(self.current_date, dato))
-
         logger.info('Resetting and updating variables')
-        if self.current_date.get() == NO_DATE:
-            self.current_date.set(date_list[-1])
-        vagter = self.controller.get_vagter(self.current_date.get())
+        vagter = model[dt]
         # ugly, ugly HU handling
         hu_vagter = {}
         for vagt in vagter:
@@ -83,6 +83,9 @@ class View(tk.Tk):
         for key, gaster in hu_vagter.items():
             text = ', '.join(gaster)
             self._vars[key].set(text)
+        display_date = dt.isoformat() or NO_DATE
+        self.current_date.set(display_date)
+
 
     def _get_vars_helper(self):
         for k,v in self._vars.items():
@@ -93,32 +96,36 @@ class View(tk.Tk):
             else:
                 yield k, text
 
+
     def get_vars(self):
         return list(self._get_vars_helper())
 
-    def get_previous_date(self):
-        return self.previous_date.get()
 
     def get_current_date(self):
         return self.current_date.get()
 
+
     def _make_vars(self):
         self._vars = {}
         self.current_date = tk.StringVar(self)
+        self.current_date.set(NO_DATE)
         self.current_date.trace('w', self._on_date_selected)
-        self.previous_date = tk.StringVar(self)
+
 
     def _reset_vars(self):
         logger.info('Resetting variables')
         for var in self._vars.values():
             var.set('')
 
+
     def _make_main_frame(self):
         self.main_frm = tk.Frame(self, bg='White')
         self.main_frm.pack(padx=self.PAD, pady=self.PAD, side=tk.TOP)
 
+
     def _make_var(self, key):
         return self._vars.setdefault(key, tk.StringVar(self))
+
 
     def _make_menu(self):
         menu = tk.Menu(self)
@@ -131,7 +138,7 @@ class View(tk.Tk):
 
         rediger_menu = tk.Menu(menu)
         menu.add_cascade(label="Rediger", menu=rediger_menu)
-        rediger_menu.add_command(label="Opret ny dato", command=self._on_create_date)
+        rediger_menu.add_command(label="Opret ny dato", command=self.controller.create_date)
         rediger_menu.add_command(label="Slet valgte dato", command=self.controller.delete_date)
         rediger_menu.add_command(label="Nulstil valgte dato", command=self.controller.reset_date)
 
@@ -144,6 +151,7 @@ class View(tk.Tk):
         menu.add_cascade(label="Hjælp", menu=help_menu)
         help_menu.add_command(label="Om Georg Stage vagtplanlægger", command=self.controller.get_help)
 
+
     def _make_labels(self):
 
         #tk.Label(self.main_frm, bg='White', text='Tidspunkt').grid(row=1, column=0, sticky=tk.E)
@@ -154,6 +162,7 @@ class View(tk.Tk):
             tk.Label(self.main_frm, bg='White', text=tidspunkt, width=self.WIDTH).grid(row=1, column=i+1, sticky=tk.E)
         tk.Label(self.main_frm, bg='White', text='').grid(row=len(self.LABELS)+3, column=0, sticky=tk.E)
         tk.Label(self.main_frm, bg='White', text='Ude/HU').grid(row=len(self.LABELS)+4, column=0, sticky=tk.E)
+
 
     def _make_entries(self):
 
@@ -174,7 +183,7 @@ class View(tk.Tk):
                     pejlegast_frame,
                     validate='key',
                     validatecommand=vcmd,
-                    textvariable=self._make_var((Opgave.PEJLEGAST_A, 16)),
+                    textvariable=self._make_var((Opgave.PEJLEGAST_A, 12)),
                     justify='right',
                     width=4
                 ).pack(side=tk.LEFT)
@@ -182,7 +191,7 @@ class View(tk.Tk):
                     pejlegast_frame,
                     validate='key',
                     validatecommand=vcmd,
-                    textvariable=self._make_var((Opgave.PEJLEGAST_B, 16)),
+                    textvariable=self._make_var((Opgave.PEJLEGAST_B, 12)),
                     justify='right',
                     width=4
                 ).pack(side=tk.LEFT)
@@ -218,8 +227,6 @@ class View(tk.Tk):
                     width=self.WIDTH
                 ).grid(row=len(self.LABELS)+4, column=i+1, sticky=tk.E)
 
-        #tk.Entry(pejlegast_frame, textvariable=tk.StringVar(), justify='right', width=4).pack(side=tk.LEFT)
-        #tk.Entry(pejlegast_frame, textvariable=tk.StringVar(), justify='right', width=4).pack(side=tk.LEFT)
 
     def _make_dropdown(self):
         date_list = [NO_DATE]
@@ -231,6 +238,7 @@ class View(tk.Tk):
         )
         self._dropdown.grid(row=0, column=0, sticky=tk.E)
 
+
     def show_info(self, header, text):
         messagebox.showinfo(
             header,
@@ -238,12 +246,14 @@ class View(tk.Tk):
             parent=self.main_frm
         )
 
-    def show_warning(self, header, text):
+
+    def show_warning(self, title, message):
         messagebox.showwarning(
-            header,
-            text,
+            title,
+            message,
             parent=self.main_frm
         )
+
 
     def ask_open_file(self, **kwargs):
         return filedialog.askopenfilename(
@@ -251,11 +261,13 @@ class View(tk.Tk):
             parent=self.main_frm
         )
 
+
     def ask_save_file_as(self, **kwargs):
         return filedialog.asksaveasfilename(
             **kwargs,
             parent=self.main_frm
         )
+
 
     def ask_number(self, header, text):
         number = simpledialog.askinteger(
@@ -265,10 +277,12 @@ class View(tk.Tk):
         )
         return number
 
-    def ask_string(self, header, text):
+
+    def ask_string(self, title, prompt, initial_value):
         str = simpledialog.askstring(
-            header,
-            text,
+            title,
+            prompt,
+            initialvalue=initial_value,
             parent=self.main_frm
         )
         return str
@@ -284,36 +298,5 @@ class View(tk.Tk):
 
     def _on_date_selected(self, a, b, c):
         if self.current_date.get() == NO_DATE: return
-        logger.info (f'Dato changed {self.previous_date.get()} -> {self.current_date.get()}')
-        try:
-            self.controller.change_date()
-            self.update()
-            self.previous_date.set(self.current_date.get())
-        except Exception as e:
-            # previous date was not a date
-            logger.exception(e)
-
-    def _on_create_date(self):
-        try:
-            datoer = self.controller.get_datoer()
-            if len(datoer) > 0:
-                max_dt = max(datoer)
-                initial_value = max_dt + timedelta(days=1)
-            else:
-                initial_value = date.today()
-            input_dato = simpledialog.askstring(
-                "Opret dato", "Indtast dato som skal oprettes (YYYY-MM-DD)",
-                parent=self.main_frm,
-                initialvalue=initial_value.isoformat()
-            )
-            dt = parse(input_dato).date()
-            created = self.controller.create_date(dt)
-            if created:
-                self.current_date.set(input_dato)
-                self.update()
-            else:
-                messagebox.showwarning(title='Ugyldig dato', message='Dato findes i forvejen')
-
-        except Exception as e:
-            logger.exception(e)
-            messagebox.showwarning(title='Ugyldig dato', message='Ugyldigt datoformat. Benyt venligst formatet YYYY-MM-DD, f.eks. 1935-4-24.')
+        new_date = parse(self.current_date.get()).date()
+        self.controller.change_date(new_date)

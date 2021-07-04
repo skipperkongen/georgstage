@@ -163,10 +163,10 @@ class AutoFiller:
                     for i in gaster
                 ]) == 1
 
-        ## Pejlegaster only 16-20 vagt
+        ## Pejlegaster only 12-16 vagt
         for t in VAGT_TIDER:
             # Set RHS to 1 if vagt_tid is 16, else 0
-            rhs = 1 if t == 16 else 0
+            rhs = 1 if t == 12 else 0
             prob += P.lpSum([X[i][Opgave.PEJLEGAST_A.value][t]for i in gaster]) == rhs
             prob += P.lpSum([X[i][Opgave.PEJLEGAST_B.value][t]for i in gaster]) == rhs
 
@@ -216,6 +216,8 @@ class GeorgStage:
         for vagt in vagter:
             assert(type(vagt) == Vagt)
             self._vagter.setdefault(vagt.dato, []).append(vagt)
+        datoer = self.get_datoer()
+        self.current_dato = datoer[-1] if len(datoer) else None
         self._auto_filler = auto_filler
 
     def __len__(self):
@@ -223,6 +225,12 @@ class GeorgStage:
         returns the number of days set, i.e. distinct **keys** in self._vagter
         """
         return len(self._vagter)
+
+    def get_current_dato(self):
+        return self.current_dato
+
+    def set_current_dato(self, dt):
+        self.current_dato = dt
 
     def __getitem__(self, dt):
         dt = parse(str(dt)).date()
