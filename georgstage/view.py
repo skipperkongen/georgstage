@@ -126,8 +126,8 @@ class View(tk.Tk):
 
         file_menu = tk.Menu(menu)
         menu.add_cascade(label="Filer", menu=file_menu)
-        file_menu.add_command(label="Åben vagtplan", command=self._on_open)
-        file_menu.add_command(label="Gem vagtplan", command=self._on_save_as)
+        file_menu.add_command(label="Åben vagtplan", command=self.controller.open_file)
+        file_menu.add_command(label="Gem vagtplan", command=self.controller.save_file_as)
 
         rediger_menu = tk.Menu(menu)
         menu.add_cascade(label="Rediger", menu=rediger_menu)
@@ -142,7 +142,7 @@ class View(tk.Tk):
 
         help_menu = tk.Menu(menu)
         menu.add_cascade(label="Hjælp", menu=help_menu)
-        help_menu.add_command(label="Om Georg Stage vagtplanlægger", command=self._on_help)
+        help_menu.add_command(label="Om Georg Stage vagtplanlægger", command=self.controller.get_help)
 
     def _make_labels(self):
 
@@ -231,19 +231,6 @@ class View(tk.Tk):
         )
         self._dropdown.grid(row=0, column=0, sticky=tk.E)
 
-    def show_can_not_fill(self):
-        messagebox.showwarning("Udfyld resten",f"Vagtplanen kan ikke udfyldes.")
-
-    def show_ask_skifte(self, vagt_tid=0):
-        skifte = simpledialog.askinteger(
-            "Angiv skifte", f"Hvilket skifte har vagt fra klokken {vagt_tid}",
-            parent=self.main_frm
-        )
-        return skifte
-
-    def _on_help(self):
-        messagebox.showinfo(title='Hjælp', message='Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage')
-
     def _on_date_selected(self, a, b, c):
         if self.current_date.get() == NO_DATE: return
         logger.info (f'Dato changed {self.previous_date.get()} -> {self.current_date.get()}')
@@ -255,17 +242,27 @@ class View(tk.Tk):
             # previous date was not a date
             logger.exception(e)
 
-    def show_confirm_delete_date(self, dt):
-        return messagebox.askokcancel("Slet dato",f"Er du sikker på at du vil slette den datoen {dt.isoformat()}?")
+    def show_info(self, header, text):
+        messagebox.showinfo(header, text)
 
-    def show_confirm_reset_date(self, dt):
-        return messagebox.askokcancel("Slet dato",f"Er du sikker på at du vil nulstille datoen {dt.isoformat()}?")
+    def show_warning(self, header, text):
+        messagebox.showwarning(header, text)
 
-    def show_could_not_delete_date(self):
-        messagebox.showwarning("Slet dato",f"Kunne ikke slette dato")
+    def ask_open_file(self, **kwargs):
+        return filedialog.askopenfilename(**kwargs)
 
-    def show_could_not_reset_date(self):
-        messagebox.showwarning("Slet dato",f"Kunne ikke nulstille dato")
+    def ask_save_file_as(self, **kwargs):
+        return filedialog.asksaveasfilename(**kwargs)
+
+    def ask_number(self, header, text):
+        number = simpledialog.askinteger(
+            header, text,
+            parent=self.main_frm
+        )
+        return number
+
+    def ask_consent(self, header, text):
+        return messagebox.askokcancel(header, text)
 
     def _on_create_date(self):
         try:
@@ -291,23 +288,3 @@ class View(tk.Tk):
         except Exception as e:
             logger.exception(e)
             messagebox.showwarning(title='Ugyldig dato', message='Ugyldigt datoformat. Benyt venligst formatet YYYY-MM-DD, f.eks. 1935-4-24.')
-
-    def _on_open(self):
-        logger.info('Opening file')
-        try:
-            filename = filedialog.askopenfilename(filetypes=[('Georg Stage Vagtplan', '*.gsv')])
-            self.controller.open_file(filename)
-            self.update()
-        except Exception as e:
-            logger.exception(e)
-            messagebox.showerror(title='Fejl', message='Der opstod en fejl under forsøget på at åbne din vagtplan. Check filformatet og prøv igen.')
-
-    def _on_save_as(self):
-        try:
-            filename = filedialog.asksaveasfilename(defaultextension='gsv', filetypes=[('Georg Stage Vagtplan', '*.gsv')])
-            if filename is not None:
-                self.controller.save_file(filename)
-                messagebox.showinfo(title='Fil gemt', message='Din vagtplan er blevet gemt')
-        except Exception as e:
-            logger.exception(e)
-            messagebox.showerror(title='Fejl', message='Der opstod en fejl under forsøget på at gemme din vagtplan')
