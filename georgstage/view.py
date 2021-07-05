@@ -50,6 +50,7 @@ class View(tk.Tk):
         self._make_labels()
         self._make_dropdown()
         self._make_entries()
+        self.update()
 
 
     def main(self):
@@ -84,15 +85,19 @@ class View(tk.Tk):
         logger.info('Updating')
         # get model state
         dt = self.model.get_current_dato()
-        if dt is None: return
         datoer = self.model.get_datoer()
-        vagter = self.model[dt]
+        if dt is None:
+            self.hint.set('Vælg Filer > Åben vagtplan eller Rediger > Opret dato for at fortsætte')
+            vagter = []
+        else:
+            self.hint.set('')
+            vagter = self.model[dt]
         # redraw UI
         self._clear_screen()
         self._refresh_datoer(datoer)
         self._refresh_vagter(vagter)
         # set correct date. Stinks a bit. Necessary?
-        display_date = dt.isoformat() or NO_DATE
+        display_date = dt.isoformat() if dt is not None else NO_DATE
         self.current_date.set(display_date)
 
 
@@ -123,7 +128,7 @@ class View(tk.Tk):
         self.current_date = tk.StringVar(self)
         self.current_date.set(NO_DATE)
         self.current_date.trace('w', self._on_date_selected)
-
+        self.hint = tk.StringVar(self)
 
     def _clear_screen(self):
         logger.info('Resetting variables')
@@ -167,6 +172,8 @@ class View(tk.Tk):
 
 
     def _make_labels(self):
+
+        tk.Label(self.main_frm, bg='White', textvariable=self.hint, fg='red').grid(row=0, column=1, columnspan=5, sticky=tk.W)
 
         #tk.Label(self.main_frm, bg='White', text='Tidspunkt').grid(row=1, column=0, sticky=tk.E)
         tk.Label(self.main_frm, bg='White', text='').grid(row=2, column=0, sticky=tk.E)
