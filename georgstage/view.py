@@ -39,9 +39,10 @@ class View(tk.Tk):
     COLS = 6
 
 
-    def __init__(self, controller):
+    def __init__(self, controller, model):
         super(View, self).__init__()
         self.controller = controller
+        self.model = model
         self.title('Georg Stage vagtplanlægger')
         self._make_vars()
         self._make_main_frame()
@@ -56,20 +57,14 @@ class View(tk.Tk):
         self.mainloop()
 
 
-    def update(self, model):
-        logger.info('Updating')
-        dt = model.get_current_dato()
-        logger.info(type(dt))
-        self._reset_vars()
-        # refresh date list
-        logger.info('Updating date list')
-        datoer = model.get_datoer()
+    def _refresh_datoer(self, datoer):
         date_list = sorted([d.isoformat() for d in datoer])
         self._dropdown['menu'].delete(0, 'end')
         for dato in date_list:
             self._dropdown['menu'].add_command(label=dato, command=tk._setit(self.current_date, dato))
-        logger.info('Resetting and updating variables')
-        vagter = model[dt]
+
+
+    def _refresh_vagter(self, vagter):
         # ugly, ugly HU handling
         hu_vagter = {}
         for vagt in vagter:
@@ -83,8 +78,26 @@ class View(tk.Tk):
         for key, gaster in hu_vagter.items():
             text = ', '.join(gaster)
             self._vars[key].set(text)
+
+
+    def update(self):
+        logger.info('Updating')
+        # get model state
+        dt = self.model.get_current_dato()
+        if dt is None: return
+        datoer = self.model.get_datoer()
+        vagter = self.model[dt]
+        # redraw UI
+        self._clear_screen()
+        self._refresh_datoer(datoer)
+        self._refresh_vagter(vagter)
+        # set correct date. Stinks a bit. Necessary?
         display_date = dt.isoformat() or NO_DATE
         self.current_date.set(display_date)
+
+
+    def set_model(self, model):
+        self.model = model
 
 
     def _get_vars_helper(self):
@@ -112,7 +125,7 @@ class View(tk.Tk):
         self.current_date.trace('w', self._on_date_selected)
 
 
-    def _reset_vars(self):
+    def _clear_screen(self):
         logger.info('Resetting variables')
         for var in self._vars.values():
             var.set('')
@@ -135,6 +148,7 @@ class View(tk.Tk):
         menu.add_cascade(label="Filer", menu=file_menu)
         file_menu.add_command(label="Åben vagtplan", command=self.controller.open_file)
         file_menu.add_command(label="Gem vagtplan", command=self.controller.save_file_as)
+        file_menu.add_command(label="Eksporter til word", command=self.controller.export_word)
 
         rediger_menu = tk.Menu(menu)
         menu.add_cascade(label="Rediger", menu=rediger_menu)
@@ -168,13 +182,10 @@ class View(tk.Tk):
 
         # vagter, except pejlegast
         def is_gast_or_empty(str):
-            try:
-                valid_date = parse(self.current_date.get())
-                return str == '' or (str.isdigit() and 0 < int(str) <= 60)
-            except:
-                messagebox.showwarning(title='Ingen dato valgt', message='Før du kan indtaste gaster, skal du vælge en dato fra dropdown eller oprette en ny dato under "Rediger" -> "Opret dato"')
-                return False
+            return str == '' or (str.isdigit() and 0 < int(str) <= 60)
+
         vcmd = (self.register(is_gast_or_empty), '%P')
+
         for i, (opgave, label_text) in enumerate(self.LABELS):
             if opgave == (Opgave.PEJLEGAST_A, Opgave.PEJLEGAST_B):
                 # Pejlegase entries

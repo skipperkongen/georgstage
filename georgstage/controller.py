@@ -12,8 +12,9 @@ class Controller(object):
     """docstring for Controller."""
 
     def __init__(self):
-        self.model = GeorgStage([])
-        self.view = View(self)
+        model = GeorgStage([])
+        self.model = model
+        self.view = View(self, model)
 
     def main(self):
         logger.info('In main of controller')
@@ -30,7 +31,7 @@ class Controller(object):
             text = f"Er du sikker på at du vil slette {dt.isoformat()}?"
             if self.view.ask_consent(header, text):
                 del self.model[dt]
-                self.view.update(self.model)
+                self.view.update()
         except:
             self.view.show_warning("Fejl", "Kunne ikke slette dato")
 
@@ -43,7 +44,7 @@ class Controller(object):
             text = f"Er du sikker på at du vil nulstille {dt.isoformat()}?"
             if self.view.ask_consent(header, text):
                 self.model[dt] = []
-                self.view.update(self.model)
+                self.view.update()
         except:
             self.view.show_warning("Fejl", "Kunne ikke nulstille datoen")
 
@@ -91,14 +92,14 @@ class Controller(object):
             vagter.append(pejlegast_a)
         self.model[new_dt] = vagter
         self.model.set_current_dato(new_dt)
-        self.view.update(self.model)
+        self.view.update()
 
 
     def change_date(self, new_date):
         logger.info(f'Changing date')
         self.persist_view()
         self.model.set_current_dato(new_date)
-        self.view.update(self.model)
+        self.view.update()
 
 
     def persist_view(self):
@@ -127,14 +128,20 @@ class Controller(object):
         return guesses
 
 
+    def export_word(self):
+        logger.info('Exporting to word')
+        self.view.show_info('Eksporter til word', 'Eksporter til word er ikke implementeret endnu')
+
+
     def open_file(self):
         logger.info('Opening file')
         try:
             filepath = self.view.ask_open_file(filetypes=[('Georg Stage Vagtplan', '*.gsv')])
             logger.info(f'loading file: {filepath}')
-            gs = GeorgStage.load(filepath)
-            self.model = gs
-            self.view.update(self.model)
+            model = GeorgStage.load(filepath)
+            self.model = model
+            self.view.set_model(model)
+            self.view.update()
         except Exception as e:
             logger.exception(e)
             self.view.show_warning('Fejl', 'Der opstod en fejl under forsøget på at åbne din vagtplan. Check filformatet og prøv igen.')
@@ -181,7 +188,7 @@ class Controller(object):
                 raise ValueError(f'Vagtplan not optimal')
             #pdb.set_trace()
             self.model[dt] = fill_result.vagter
-            self.view.update(self.model)
+            self.view.update()
 
         except Exception as e:
             logger.exception(e)
