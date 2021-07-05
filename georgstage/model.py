@@ -246,6 +246,13 @@ class GeorgStage:
     def __delitem__(self, dt):
         dt = parse(str(dt)).date()
         del self._vagter[dt]
+        if dt == self.current_dato:
+            # set new current date
+            datoer = self.get_datoer()
+            if len(datoer) > 0:
+                self.current_dato = datoer[-1]
+            else:
+                self.current_dato = None
 
     def get_datoer(self):
         """

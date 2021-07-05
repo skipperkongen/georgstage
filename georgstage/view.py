@@ -153,8 +153,8 @@ class View(tk.Tk):
         rediger_menu = tk.Menu(menu)
         menu.add_cascade(label="Rediger", menu=rediger_menu)
         rediger_menu.add_command(label="Opret ny dato", command=self.controller.create_date)
-        rediger_menu.add_command(label="Slet valgte dato", command=self.controller.delete_date)
         rediger_menu.add_command(label="Nulstil valgte dato", command=self.controller.reset_date)
+        rediger_menu.add_command(label="Slet valgte dato", command=self.controller.delete_date)
 
         function_menu = tk.Menu(menu)
         menu.add_cascade(label="Funktioner", menu=function_menu)
