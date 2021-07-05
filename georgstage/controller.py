@@ -60,6 +60,7 @@ class Controller(object):
 
     def create_date(self):
         logger.info(f'Creating date')
+        self.persist_view()
         datoer = self.model.get_datoer()
         if len(datoer) > 0:
             max_dt = max(datoer)
