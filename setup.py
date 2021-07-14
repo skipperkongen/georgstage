@@ -6,8 +6,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='georgstage',
-    version='v0.0.4',
-    download_url='https://github.com/skipperkongen/georgstage/archive/v0.0.4.tar.gz',
+    version='v0.0.5',
+    download_url='https://github.com/skipperkongen/georgstage/archive/refs/tags/v0.0.5.tar.gz',
     licence='MIT',
     author="Pimin Konstantin Kefaloukos",
     author_email="skipperkongen@gmail.com",
