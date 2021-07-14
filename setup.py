@@ -16,7 +16,11 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/skipperkongen/georgstage",
     packages=['georgstage'],
-    install_requires=[],
+    install_requires=[
+        'numpy==1.20.3',
+        'pandas==1.2.4',
+        'PuLP==2.4',
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
