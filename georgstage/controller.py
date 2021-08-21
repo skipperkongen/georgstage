@@ -163,7 +163,7 @@ class Controller(object):
 
     def get_help(self):
         header = 'Hjælp'
-        text = 'Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage'
+        text = 'Dette programmet er udviklet af Pimin Konstantin Kefaloukos. Læs mere på hjemmesiden https://github.com/skipperkongen/georgstage :-)'
         self.view.show_info(header, text)
 
     def autofill(self):

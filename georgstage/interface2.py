@@ -221,7 +221,7 @@ class Controller():
 
 if __name__=='__main__':
     root = tk.Tk()
-    root.title('Georg Stage Søvagt - version 0._1')
+    root.title('Georg Stage Søvagt - version 0.8')
     controller = Controller(None)
     view = View(root, controller)
     tk.mainloop()
