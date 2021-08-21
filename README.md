@@ -125,7 +125,7 @@ Der findes også ankervagter, men det kører en smule anderledes.
 ### Sådan kører du tests
 
 Ved hjælp af make:
-
+  
 ```
 make test
 ```
@@ -135,7 +135,11 @@ make test
 Trin (kan måske forbedre):
 
 1. Opdater version and download_url felter i setup.py
-1. Kør git add + commit + push
+1. Kør git add + commit
+1. Tag version, e.g. git tag v0.0.8 -m '8th version'
+1. Kør git push origin --tags
 1. Opret ny release på GitHub (check source-code link, skal matche download_url i setup.py)
 1. Kør `python setup.py sdist`
 1. Kør `twine upload dist/* --verbose` (hvis ej installet, kør `pip install twine` først)
+
+Dette workflow skal ændres til: https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/

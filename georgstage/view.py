@@ -201,7 +201,7 @@ class View(tk.Tk):
                     pejlegast_frame,
                     validate='key',
                     validatecommand=vcmd,
-                    textvariable=self._make_var((Opgave.PEJLEGAST_A, 12)),
+                    textvariable=self._make_var((Opgave.PEJLEGAST_A, 16)),
                     justify='right',
                     width=4
                 ).pack(side=tk.LEFT)
@@ -209,14 +209,14 @@ class View(tk.Tk):
                     pejlegast_frame,
                     validate='key',
                     validatecommand=vcmd,
-                    textvariable=self._make_var((Opgave.PEJLEGAST_B, 12)),
+                    textvariable=self._make_var((Opgave.PEJLEGAST_B, 16)),
                     justify='right',
                     width=4
                 ).pack(side=tk.LEFT)
-                pejlegast_frame.grid(row=12, column=4)
+                pejlegast_frame.grid(row=12, column=5)
             elif opgave == Opgave.DAEKSELEV_I_KABYS:
-                for j in range (3):
-                    start_tid = self.START_TIDER[j+2]
+                for j in range (4):
+                    start_tid = self.START_TIDER[j+1]
                     ent = tk.Entry(
                         self.main_frm,
                         validate='key',
@@ -224,7 +224,7 @@ class View(tk.Tk):
                         justify='right',
                         textvariable=self._make_var((opgave, start_tid)),
                         width = self.WIDTH
-                    ).grid(row=i+2, column=j+3, sticky=tk.E)
+                    ).grid(row=i+2, column=j+2, sticky=tk.E)
             else:
                 for j in range(self.COLS):
                     start_tid = self.START_TIDER[j]
