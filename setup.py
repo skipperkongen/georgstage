@@ -12,7 +12,7 @@ with open('requirements.txt') as fi:
 
 setup(
     name='georgstage',
-    version='v0.1.1',
+    version='v0.1.2',
     download_url='https://github.com/skipperkongen/georgstage/archive/refs/tags/v0.1.1.tar.gz',
     licence='MIT',
     author="Pimin Konstantin Kefaloukos",

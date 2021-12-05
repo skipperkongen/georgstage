@@ -17,7 +17,7 @@ pip install -e '.[test]'
 
 Kør tests:
 
-```bash
+```
 make test
 make lint
 ```
@@ -25,6 +25,14 @@ make lint
 ## Publicer ny version
 
 > Husk altid at køre tests før du publicerer. TODO: automatiser tests
+
+Kør test:
+
+```
+# pip install -e '.[test]'
+make lint
+make test
+```
 
 Hvis en version er tagget med 'v*', f.eks. 'v0.0.1', så vil en Github action
 sørge for at der bliver bygget executables til Windows og Mac OS.
