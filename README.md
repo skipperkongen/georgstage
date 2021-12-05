@@ -2,21 +2,37 @@
 
 > Version 0.1
 
-Hjælpeprogram til vagtplanlægning ombord på Georg Stage (søvagter). Matematikken bag programmet benytter lineær programming (LP) til at optimere vagterne, således at alle opgaver varetages, samtidigt med
-at opgaverne fordeles mellem gasterne så fair som muligt.
+Dette er et hjælpeprogram til vagtplanlægning ombord på Georg Stage (søvagter).
+Matematikken bag programmet benytter lineær programming (LP) til at optimere vagterne,
+således at alle opgaver varetages, samtidigt med at opgaverne fordeles mellem
+gasterne så fair som muligt.
 
 ## Installation
 
-GeorgStage kan installeres via pip:
-
-```
-pip install georgstage
-```
-
 Til lokal udvikling:
 
+```bash
+pip install -e '.[test]'
 ```
-pip install -e .
+
+Kør tests:
+
+```bash
+make test
+make lint
+```
+
+## Publicer ny version
+
+> Husk altid at køre tests før du publicerer. TODO: automatiser tests
+
+Hvis en version er tagget med 'v*', f.eks. 'v0.0.1', så vil en Github action
+sørge for at der bliver bygget executables til Windows og Mac OS.
+
+```bash
+# Husk: skift version til den rigtige
+git tag v0.0.1 master
+git push origin v0.0.1
 ```
 
 ## Brugervejledning
