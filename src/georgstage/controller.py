@@ -41,12 +41,12 @@ class Controller(object):
         try:
             dt = parse(current_date).date()
             header = "Nulstil dato"
-            text = f"Er du sikker på at du vil nulstille {dt.isoformat()}?"
+            text = f"Er du sikker på at du vil rydde alle vagter for {dt.isoformat()}?"
             if self.view.ask_consent(header, text):
                 self.model[dt] = []
                 self.view.update()
         except:
-            self.view.show_warning("Fejl", "Kunne ikke nulstille datoen")
+            self.view.show_warning("Fejl", "Kunne ikke rydde vagter")
 
     def guess_pejlegast_a(self, dt):
         yesterday = dt - timedelta(days=1)
