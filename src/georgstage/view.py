@@ -303,7 +303,7 @@ class View(tk.Tk):
             justify='right',
             width=4
         ).pack(side=tk.LEFT)
-        pejlegast_frame.grid(row=12, column=4)
+        pejlegast_frame.grid(row=12, column=3)
 
         # Daekselev i kabys
         self._make_entry(opgave=Opgave.DAEKSELEV_I_KABYS, tid=8, row=13, col=1)

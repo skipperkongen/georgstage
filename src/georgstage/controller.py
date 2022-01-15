@@ -121,7 +121,7 @@ class Controller(object):
 
     def _guess_skifter(self, vagter):
         logger.info('Guessing skifter')
-        guesses = [None,None,None,None,None,None]
+        guesses = [None, None, None, None, None, None]
         for vagt in vagter:
             skifte = 1 + vagt.gast // 20
             idx = vagt.vagt_tid // 4

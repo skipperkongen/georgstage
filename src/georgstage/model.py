@@ -163,17 +163,17 @@ class AutoFiller:
                     for i in gaster
                 ]) == 1
 
-        ## Pejlegaster only 12-16 vagt
+        ## Pejlegaster only 16-20 vagt
         for t in VAGT_TIDER:
             # Set RHS to 1 if vagt_tid is 16, else 0
-            rhs = 1 if t == 12 else 0
+            rhs = 1 if t == 16 else 0
             prob += P.lpSum([X[i][Opgave.PEJLEGAST_A.value][t]for i in gaster]) == rhs
             prob += P.lpSum([X[i][Opgave.PEJLEGAST_B.value][t]for i in gaster]) == rhs
 
-        ## Kabys only 8-12, 12-16 and 16-20 vagt
+        ## Kabys only 4-8, 8-12, 12-16 and 16-20 vagt
         for t in VAGT_TIDER:
             # Set RHS to 1 if vagt_tid is 16, else 0
-            rhs = 1 if t in [8, 12, 16] else 0
+            rhs = 1 if t in [4, 8, 12, 16] else 0
             prob += P.lpSum([
                 X[i][Opgave.DAEKSELEV_I_KABYS.value][t]
                 for i in gaster
