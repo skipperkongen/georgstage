@@ -22,6 +22,14 @@ make test
 make lint
 ```
 
+Start program:
+
+```
+make run_local
+# or
+python src/cli.py
+```
+
 ## Publicer ny version
 
 > Husk altid at køre tests før du publicerer. TODO: automatiser tests

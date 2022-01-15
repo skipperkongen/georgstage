@@ -19,31 +19,19 @@ class View(tk.Tk):
 
     PAD = 30
     WIDTH = 12
-    LABELS = [
-        (Opgave.VAGTHAVENDE_ELEV, 'Vagthavende elev'),
-        (Opgave.ORDONNANS, 'Ordonnans'),
-        (Opgave.UDKIG, 'Udkig'),
-        (Opgave.BJAERGEMAERS, 'Bjærgemærs'),
-        (Opgave.RORGAENGER, 'Rorgænger'),
-        (Opgave.UDSAETNINGSGAST_A, 'Udsætningsgast A'),
-        (Opgave.UDSAETNINGSGAST_B, 'Udsætningsgast B'),
-        (Opgave.UDSAETNINGSGAST_C,'Udsætningsgast C'),
-        (Opgave.UDSAETNINGSGAST_D,'Udsætningsgast D'),
-        (Opgave.UDSAETNINGSGAST_E,'Udsætningsgast E'),
-        ((Opgave.PEJLEGAST_A, Opgave.PEJLEGAST_B), 'Pejlegast A/B'),
-        (Opgave.DAEKSELEV_I_KABYS, 'Dækselev i kabys')
-    ]
-    START_TIDER = [0, 4, 8, 12, 16, 20]
-    TIDSPUNKTER = ['00 - 04', '04 - 08', '08 - 12', '12 - 16', '16 - 20', '20 - 24']
-    ROWS = len(LABELS)
+    ROWS = 12
     COLS = 6
-
 
     def __init__(self, controller, model):
         super(View, self).__init__()
         self.controller = controller
         self.model = model
         self.title('Georg Stage vagtplanlægger')
+        # Register validator
+        def is_gast_or_empty(str):
+            return str == '' or (str.isdigit() and 0 < int(str) <= 60)
+        self.vcmd = (self.register(is_gast_or_empty), '%P')
+        # Create UI
         self._make_vars()
         self._make_main_frame()
         self._make_menu()
@@ -141,10 +129,6 @@ class View(tk.Tk):
         self.main_frm.pack(padx=self.PAD, pady=self.PAD, side=tk.TOP)
 
 
-    def _make_var(self, key):
-        return self._vars.setdefault(key, tk.StringVar(self))
-
-
     def _make_menu(self):
         menu = tk.Menu(self)
         self.config(menu=menu)
@@ -173,77 +157,203 @@ class View(tk.Tk):
 
     def _make_labels(self):
 
+        # Hint
         tk.Label(self.main_frm, bg='White', textvariable=self.hint, fg='red').grid(row=0, column=1, columnspan=5, sticky=tk.W)
+        # Spacer
+        tk.Label(self.main_frm, bg='White', text='').grid(row=1, column=0, sticky=tk.E)
 
-        #tk.Label(self.main_frm, bg='White', text='Tidspunkt').grid(row=1, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='').grid(row=2, column=0, sticky=tk.E)
-        for i, (_, label_text) in enumerate(self.LABELS):
-            tk.Label(self.main_frm, bg='White', text=label_text).grid(row=i+2, column=0, sticky=tk.E)
-        for i, tidspunkt in enumerate(self.TIDSPUNKTER):
-            tk.Label(self.main_frm, bg='White', text=tidspunkt, width=self.WIDTH).grid(row=1, column=i+1, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='').grid(row=len(self.LABELS)+3, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Ude/HU').grid(row=len(self.LABELS)+4, column=0, sticky=tk.E)
+        # Opgave labels
+        tk.Label(self.main_frm, bg='White', text='Vagthavende elev').grid(row=2, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Ordonnans').grid(row=3, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Udkig').grid(row=4, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Bjærgemærs').grid(row=5, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Rorgænger').grid(row=6, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Udsætningsgast A').grid(row=7, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Udsætningsgast B').grid(row=8, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Udsætningsgast C').grid(row=9, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Udsætningsgast D').grid(row=10, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Udsætningsgast E').grid(row=11, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Pejlegast A/B').grid(row=12, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Dækselev i kabys').grid(row=13, column=0, sticky=tk.E)
 
+        # Tidspunkt labels
+        tk.Label(self.main_frm, bg='White', text='08 - 12', width=self.WIDTH).grid(row=1, column=1, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='12 - 16', width=self.WIDTH).grid(row=1, column=2, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='16 - 20', width=self.WIDTH).grid(row=1, column=3, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='20 - 24', width=self.WIDTH).grid(row=1, column=4, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='00 - 04', width=self.WIDTH).grid(row=1, column=5, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='04 - 08', width=self.WIDTH).grid(row=1, column=6, sticky=tk.E)
+
+        # Spacer
+        tk.Label(self.main_frm, bg='White', text='').grid(row=14, column=0, sticky=tk.E)
+        tk.Label(self.main_frm, bg='White', text='Ude/HU').grid(row=15, column=0, sticky=tk.E)
+
+
+    def _make_entry(self, opgave, tid, row, col):
+        key = (opgave, tid)
+        var = self._vars.setdefault(key, tk.StringVar(self))
+        return tk.Entry(
+            self.main_frm,
+            validate='key',
+            validatecommand=self.vcmd,
+            justify='right',
+            textvariable=var,
+            width = self.WIDTH
+        ).grid(row=row, column=col, sticky=tk.E)
 
     def _make_entries(self):
 
-        # vagter, except pejlegast
-        def is_gast_or_empty(str):
-            return str == '' or (str.isdigit() and 0 < int(str) <= 60)
+        # Vagthavende elev
+        self._make_entry(opgave=Opgave.VAGTHAVENDE_ELEV, tid=8, row=2, col=1)
+        self._make_entry(opgave=Opgave.VAGTHAVENDE_ELEV, tid=12, row=2, col=2)
+        self._make_entry(opgave=Opgave.VAGTHAVENDE_ELEV, tid=16, row=2, col=3)
+        self._make_entry(opgave=Opgave.VAGTHAVENDE_ELEV, tid=20, row=2, col=4)
+        self._make_entry(opgave=Opgave.VAGTHAVENDE_ELEV, tid=0, row=2, col=5)
+        self._make_entry(opgave=Opgave.VAGTHAVENDE_ELEV, tid=4, row=2, col=6)
 
-        vcmd = (self.register(is_gast_or_empty), '%P')
+        # Ordonnans
+        self._make_entry(opgave=Opgave.ORDONNANS, tid=8, row=3, col=1)
+        self._make_entry(opgave=Opgave.ORDONNANS, tid=12, row=3, col=2)
+        self._make_entry(opgave=Opgave.ORDONNANS, tid=16, row=3, col=3)
+        self._make_entry(opgave=Opgave.ORDONNANS, tid=20, row=3, col=4)
+        self._make_entry(opgave=Opgave.ORDONNANS, tid=0, row=3, col=5)
+        self._make_entry(opgave=Opgave.ORDONNANS, tid=4, row=3, col=6)
 
-        for i, (opgave, label_text) in enumerate(self.LABELS):
-            if opgave == (Opgave.PEJLEGAST_A, Opgave.PEJLEGAST_B):
-                # Pejlegase entries
-                pejlegast_frame = tk.Frame(self.main_frm)
-                tk.Entry(
-                    pejlegast_frame,
-                    validate='key',
-                    validatecommand=vcmd,
-                    textvariable=self._make_var((Opgave.PEJLEGAST_A, 12)),
-                    justify='right',
-                    width=4
-                ).pack(side=tk.LEFT)
-                tk.Entry(
-                    pejlegast_frame,
-                    validate='key',
-                    validatecommand=vcmd,
-                    textvariable=self._make_var((Opgave.PEJLEGAST_B, 12)),
-                    justify='right',
-                    width=4
-                ).pack(side=tk.LEFT)
-                pejlegast_frame.grid(row=12, column=4)
-            elif opgave == Opgave.DAEKSELEV_I_KABYS:
-                for j in range (3):
-                    start_tid = self.START_TIDER[j+2]
-                    ent = tk.Entry(
-                        self.main_frm,
-                        validate='key',
-                        validatecommand=vcmd,
-                        justify='right',
-                        textvariable=self._make_var((opgave, start_tid)),
-                        width = self.WIDTH
-                    ).grid(row=i+2, column=j+3, sticky=tk.E)
-            else:
-                for j in range(self.COLS):
-                    start_tid = self.START_TIDER[j]
-                    ent = tk.Entry(
-                        self.main_frm,
-                        validate='key',
-                        validatecommand=vcmd,
-                        justify='right',
-                        textvariable=self._make_var((opgave, start_tid)),
-                        width = self.WIDTH
-                    ).grid(row=i+2, column=j+1, sticky=tk.E)
-            for i in range(self.COLS):
-                start_tid = self.START_TIDER[i]
-                tk.Entry(
-                    self.main_frm,
-                    justify='right',
-                    textvariable=self._make_var((Opgave.UDE, start_tid)),
-                    width=self.WIDTH
-                ).grid(row=len(self.LABELS)+4, column=i+1, sticky=tk.E)
+        # Udkig
+        self._make_entry(opgave=Opgave.UDKIG, tid=8, row=4, col=1)
+        self._make_entry(opgave=Opgave.UDKIG, tid=12, row=4, col=2)
+        self._make_entry(opgave=Opgave.UDKIG, tid=16, row=4, col=3)
+        self._make_entry(opgave=Opgave.UDKIG, tid=20, row=4, col=4)
+        self._make_entry(opgave=Opgave.UDKIG, tid=0, row=4, col=5)
+        self._make_entry(opgave=Opgave.UDKIG, tid=4, row=4, col=6)
+
+        # Bjaergemaers
+        self._make_entry(opgave=Opgave.BJAERGEMAERS, tid=8, row=5, col=1)
+        self._make_entry(opgave=Opgave.BJAERGEMAERS, tid=12, row=5, col=2)
+        self._make_entry(opgave=Opgave.BJAERGEMAERS, tid=16, row=5, col=3)
+        self._make_entry(opgave=Opgave.BJAERGEMAERS, tid=20, row=5, col=4)
+        self._make_entry(opgave=Opgave.BJAERGEMAERS, tid=0, row=5, col=5)
+        self._make_entry(opgave=Opgave.BJAERGEMAERS, tid=4, row=5, col=6)
+
+        # Rorganger
+        self._make_entry(opgave=Opgave.RORGAENGER, tid=8, row=6, col=1)
+        self._make_entry(opgave=Opgave.RORGAENGER, tid=12, row=6, col=2)
+        self._make_entry(opgave=Opgave.RORGAENGER, tid=16, row=6, col=3)
+        self._make_entry(opgave=Opgave.RORGAENGER, tid=20, row=6, col=4)
+        self._make_entry(opgave=Opgave.RORGAENGER, tid=0, row=6, col=5)
+        self._make_entry(opgave=Opgave.RORGAENGER, tid=4, row=6, col=6)
+
+        # Udsaetningsgast A
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_A, tid=8, row=7, col=1)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_A, tid=12, row=7, col=2)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_A, tid=16, row=7, col=3)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_A, tid=20, row=7, col=4)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_A, tid=0, row=7, col=5)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_A, tid=4, row=7, col=6)
+
+        # Udsaetningsgast B
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_B, tid=8, row=8, col=1)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_B, tid=12, row=8, col=2)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_B, tid=16, row=8, col=3)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_B, tid=20, row=8, col=4)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_B, tid=0, row=8, col=5)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_B, tid=4, row=8, col=6)
+
+        # Udsaetningsgast C
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_C, tid=8, row=9, col=1)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_C, tid=12, row=9, col=2)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_C, tid=16, row=9, col=3)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_C, tid=20, row=9, col=4)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_C, tid=0, row=9, col=5)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_C, tid=4, row=9, col=6)
+
+        # Udsaetningsgast D
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_D, tid=8, row=10, col=1)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_D, tid=12, row=10, col=2)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_D, tid=16, row=10, col=3)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_D, tid=20, row=10, col=4)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_D, tid=0, row=10, col=5)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_D, tid=4, row=10, col=6)
+
+        # Udsaetningsgast E
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_E, tid=8, row=11, col=1)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_E, tid=12, row=11, col=2)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_E, tid=16, row=11, col=3)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_E, tid=20, row=11, col=4)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_E, tid=0, row=11, col=5)
+        self._make_entry(opgave=Opgave.UDSAETNINGSGAST_E, tid=4, row=11, col=6)
+
+        # Pejlegaster
+        pejlegast_frame = tk.Frame(self.main_frm)
+        var_pejlegast_a = self._vars.setdefault((Opgave.PEJLEGAST_A, 16), tk.StringVar(self))
+        var_pejlegast_b = self._vars.setdefault((Opgave.PEJLEGAST_B, 16), tk.StringVar(self))
+        tk.Entry(
+            pejlegast_frame,
+            validate='key',
+            validatecommand=self.vcmd,
+            textvariable=var_pejlegast_a,
+            justify='right',
+            width=4
+        ).pack(side=tk.LEFT)
+        tk.Entry(
+            pejlegast_frame,
+            validate='key',
+            validatecommand=self.vcmd,
+            textvariable=var_pejlegast_b,
+            justify='right',
+            width=4
+        ).pack(side=tk.LEFT)
+        pejlegast_frame.grid(row=12, column=4)
+
+        # Daekselev i kabys
+        self._make_entry(opgave=Opgave.DAEKSELEV_I_KABYS, tid=8, row=13, col=1)
+        self._make_entry(opgave=Opgave.DAEKSELEV_I_KABYS, tid=12, row=13, col=2)
+        self._make_entry(opgave=Opgave.DAEKSELEV_I_KABYS, tid=16, row=13, col=3)
+        self._make_entry(opgave=Opgave.DAEKSELEV_I_KABYS, tid=4, row=13, col=6)
+
+        # Ude/HU
+        # 8-12
+        tk.Entry(
+            self.main_frm,
+            justify='right',
+            textvariable=self._vars.setdefault((Opgave.UDE, 8), tk.StringVar(self)),
+            width=self.WIDTH
+        ).grid(row=15, column=1, sticky=tk.E)
+        # 12-16
+        tk.Entry(
+            self.main_frm,
+            justify='right',
+            textvariable=self._vars.setdefault((Opgave.UDE, 12), tk.StringVar(self)),
+            width=self.WIDTH
+        ).grid(row=15, column=2, sticky=tk.E)
+        # 16-20
+        tk.Entry(
+            self.main_frm,
+            justify='right',
+            textvariable=self._vars.setdefault((Opgave.UDE, 16), tk.StringVar(self)),
+            width=self.WIDTH
+        ).grid(row=15, column=3, sticky=tk.E)
+        # 20-24
+        tk.Entry(
+            self.main_frm,
+            justify='right',
+            textvariable=self._vars.setdefault((Opgave.UDE, 20), tk.StringVar(self)),
+            width=self.WIDTH
+        ).grid(row=15, column=4, sticky=tk.E)
+        # 00-04
+        tk.Entry(
+            self.main_frm,
+            justify='right',
+            textvariable=self._vars.setdefault((Opgave.UDE, 0), tk.StringVar(self)),
+            width=self.WIDTH
+        ).grid(row=15, column=5, sticky=tk.E)
+        # 04-08
+        tk.Entry(
+            self.main_frm,
+            justify='right',
+            textvariable=self._vars.setdefault((Opgave.UDE, 4), tk.StringVar(self)),
+            width=self.WIDTH
+        ).grid(row=15, column=6, sticky=tk.E)
 
 
     def _make_dropdown(self):
