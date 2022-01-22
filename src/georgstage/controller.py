@@ -55,7 +55,7 @@ class Controller(object):
         for vagt in self.model[yesterday]:
             if vagt.opgave == Opgave.PEJLEGAST_B:
                 logger.info(vagt)
-                return Vagt(dato=dt, vagt_tid=12, gast=vagt.gast, opgave=Opgave.PEJLEGAST_A)
+                return Vagt(dato=dt, vagt_tid=16, gast=vagt.gast, opgave=Opgave.PEJLEGAST_A)
 
 
     def create_date(self):
