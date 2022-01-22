@@ -71,19 +71,21 @@ class AutoFiller:
     def __init__(self):
         pass
 
-    def get_counts(self, vagter):
+    def get_counts(self, vagter: List[Vagt]):
         """
         Returns function with signature lookup(gast:int, opgave:str) -> count: int
+        Treat fysiske vagter special: sum of all fysiske, not just concrete
         """
-        if len(vagter):
-            df = pd.DataFrame([a.to_dict() for a in vagter])
-        else:
-            df = pd.DataFrame([], columns=[
-                'dato', 'vagt_tid', 'skifte', 'gast', 'opgave'
-            ])
-        hist = df.groupby(['gast', 'opgave']).size()
-        counts = df.groupby(['gast', 'opgave']).size()
-        return lambda gast, opgave: counts.get((gast,opgave.name)) or 0
+        stats = {}
+        fysiske = (Opgave.ORDONNANS, Opgave.UDKIG, Opgave.BJAERGEMAERS, Opgave.RORGAENGER)
+        for vagt in vagter:
+            if vagt.opgave in fysiske:
+                keys = [(vagt.gast, opgave) for opgave in fysiske]
+            else:
+                keys = [(vagt.gast, vagt.opgave)]
+            for key in keys:
+                stats[key] = stats.setdefault(key, 0) + 1
+        return lambda gast, opgave: stats.get((gast, opgave)) or 0
 
     def get_counts_frame(self, vagter):
         """
@@ -117,17 +119,22 @@ class AutoFiller:
         # Problem
         prob = P.LpProblem('udfyld_vagter', P.LpMinimize)
 
-        # Remove gasts from problem, who should not be assigned
+        # All gaster
+        gaster = [gast for gast in range(1, N_GASTS+1)]
+
+        # All opgaver
         opgaver = [o.value for o in Opgave]
+
+        # Special opgaver
         opgaver_spec = [
             Opgave.UDE.value,
             Opgave.DAEKSELEV_I_KABYS.value,
             Opgave.PEJLEGAST_A.value,
-            Opgave.PEJLEGAST_B.value
+            Opgave.PEJLEGAST_B.value,
         ]
+        # Normal opgaver
         opgaver_norm = [o.value for o in Opgave if o.value not in opgaver_spec]
 
-        gaster = [gast for gast in range(1, N_GASTS+1)]
 
         # Decision variables (normal tasks)
         #   X_ijt: gast i, opgave j, hour t
@@ -170,7 +177,7 @@ class AutoFiller:
             prob += P.lpSum([X[i][Opgave.PEJLEGAST_A.value][t]for i in gaster]) == rhs
             prob += P.lpSum([X[i][Opgave.PEJLEGAST_B.value][t]for i in gaster]) == rhs
 
-        ## Kabys only 4-8, 8-12, 12-16 and 16-20 vagt
+        ## Dæks elev i kabys. Only 4, 8, 12, 16
         for t in VAGT_TIDER:
             # Set RHS to 1 if vagt_tid is 16, else 0
             rhs = 1 if t in [4, 8, 12, 16] else 0
