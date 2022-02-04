@@ -38,7 +38,8 @@ jobs:
         include:
           - os: macos-latest
             TARGET: macos
-            CMD_BUILD: pyinstaller -F -w -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/
+            CMD_BUILD: pyinstaller -F -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/
+#            CMD_BUILD: pyinstaller -F -w -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/
             OUT_FILE_NAME: georgstage.zip
             ASSET_MIME: application/zip
           - os: windows-latest
@@ -51,7 +52,7 @@ jobs:
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.9.5
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

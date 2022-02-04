@@ -186,14 +186,14 @@ class Controller(object):
             fill_result = self.model.autofill(dt, skifter)
             logger.info(fill_result)
             if fill_result.status != 1:
-                raise ValueError(f'Vagtplan not optimal')
+                raise ValueError(f'Tjek at vagtplan er korrekt udfyldt')
             #pdb.set_trace()
             self.model[dt] = fill_result.vagter
             self.view.update()
 
         except Exception as e:
             logger.exception(e)
-            self.view.show_warning("Fejl", "Vagtplanen kan ikke udfyldes automatisk")
+            self.view.show_warning("Fejl", f"Vagtplanen kan ikke udfyldes automatisk: {e}")
 
 
     def show_stats(self):
