@@ -6,8 +6,8 @@ with open("README.md", "r") as fh:
 
 setup(
     name='georgstage',
-    version='0.2.11',
-    download_url='https://github.com/skipperkongen/georgstage/archive/refs/tags/v0.2.11.tar.gz',
+    version='0.2.12',
+    download_url='https://github.com/skipperkongen/georgstage/archive/refs/tags/v0.2.12.tar.gz',
     author="Pimin Konstantin Kefaloukos",
     author_email="skipperkongen@gmail.com",
     description="Hjælpeprogram til skoleskibet Georg Stage",
