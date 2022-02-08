@@ -12,8 +12,8 @@ with open('requirements.txt') as fi:
 
 setup(
     name='georgstage',
-    version='v0.2.1',
-    download_url='https://github.com/skipperkongen/georgstage/archive/refs/tags/v0.2.1.tar.gz',
+    version='v0.2.6',
+    download_url='https://github.com/skipperkongen/georgstage/archive/refs/tags/v0.2.6.tar.gz',
     licence='MIT',
     author="Pimin Konstantin Kefaloukos",
     author_email="skipperkongen@gmail.com",

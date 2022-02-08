@@ -38,8 +38,8 @@ jobs:
         include:
           - os: macos-latest
             TARGET: macos
-            CMD_BUILD: pyinstaller -F -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/
-#            CMD_BUILD: pyinstaller -F -w -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/
+            # CMD_BUILD: pyinstaller -F -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/
+            CMD_BUILD: pyinstaller -F -w -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/
             OUT_FILE_NAME: georgstage.zip
             ASSET_MIME: application/zip
           - os: windows-latest
