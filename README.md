@@ -1,7 +1,5 @@
 # Georg Stage vagtplanlægger
 
-> Version 0.2.1
-
 Dette er et hjælpeprogram til vagtplanlægning ombord på Georg Stage (søvagter).
 Matematikken bag programmet benytter lineær programming (LP) til at optimere vagterne,
 således at alle opgaver varetages, samtidigt med at opgaverne fordeles mellem

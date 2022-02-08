@@ -12,8 +12,8 @@ with open('requirements.txt') as fi:
 
 setup(
     name='georgstage',
-    version='v0.2.7',
-    download_url='https://github.com/skipperkongen/georgstage/archive/refs/tags/v0.2.7.tar.gz',
+    version='v0.2.9',
+    download_url='https://github.com/skipperkongen/georgstage/archive/refs/tags/v0.2.9.tar.gz',
     licence='MIT',
     author="Pimin Konstantin Kefaloukos",
     author_email="skipperkongen@gmail.com",
@@ -30,4 +30,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    py_modules=['georgstage'],
 )

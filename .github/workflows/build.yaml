@@ -38,13 +38,12 @@ jobs:
         include:
           - os: macos-latest
             TARGET: macos
-            # CMD_BUILD: pyinstaller -F -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/
-            CMD_BUILD: pyinstaller -F -w -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/
+            CMD_BUILD: pyinstaller -n Georgstage -i resources/georgstage.icns src/cli.py && cd dist/ && zip -r9 georgstage georgstage.app/ # -F -w
             OUT_FILE_NAME: georgstage.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
-            CMD_BUILD: pyinstaller -F -w -n georgstage -i resources/georgstage.ico src/cli.py
+            CMD_BUILD: pyinstaller -n georgstage -i resources/georgstage.ico src/cli.py # -F -w
             OUT_FILE_NAME: georgstage.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
