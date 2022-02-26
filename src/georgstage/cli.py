@@ -3,6 +3,9 @@ from georgstage.controller import Controller
 
 logging.basicConfig(level=logging.INFO)
 
-if __name__ == '__main__':
+def main():
     app = Controller()
     app.main()
+
+if __name__ == '__main__':
+    main()

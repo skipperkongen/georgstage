@@ -9,5 +9,5 @@ lint:
 
 run_local:
 	echo 'running local'
-	python src/cli.py
+	python src/georgstage/cli.py
 .PHONY: run_local

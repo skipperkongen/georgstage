@@ -10,6 +10,8 @@ gasterne så fair som muligt.
 Til lokal udvikling:
 
 ```bash
+python3 -m venv venv
+source venv/bin/activate
 pip install -e '.[test]'
 ```
 
