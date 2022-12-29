@@ -1,12 +1,12 @@
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from dateutil.parser import parse
 import logging
-import pdb
 
-from georgstage.model import GeorgStage, Vagt, Opgave, AutoFiller
-from georgstage.view import View, NO_DATE
+from georgstage.model import GeorgStage, Vagt, Opgave
+from georgstage.view import View
 
 logger = logging.getLogger()
+
 
 class Controller(object):
     """docstring for Controller."""
@@ -32,9 +32,8 @@ class Controller(object):
             if self.view.ask_consent(header, text):
                 del self.model[dt]
                 self.view.update()
-        except:
+        except Exception:
             self.view.show_warning("Fejl", "Kunne ikke slette dato")
-
 
     def reset_date(self):
         current_date = self.view.get_current_date()
@@ -45,7 +44,7 @@ class Controller(object):
             if self.view.ask_consent(header, text):
                 self.model[dt] = []
                 self.view.update()
-        except:
+        except Exception:
             self.view.show_warning("Fejl", "Kunne ikke rydde vagter")
 
     def guess_pejlegast_a(self, dt):
@@ -57,9 +56,8 @@ class Controller(object):
                 logger.info(vagt)
                 return Vagt(dato=dt, vagt_tid=16, gast=vagt.gast, opgave=Opgave.PEJLEGAST_A)
 
-
     def create_date(self):
-        logger.info(f'Creating date')
+        logger.info('Creating date')
         self.persist_view()
         datoer = self.model.get_datoer()
         if len(datoer) > 0:
@@ -74,7 +72,7 @@ class Controller(object):
         )
         try:
             new_dt = parse(input_dato).date()
-        except:
+        except Exception:
             self.view.show_warning(
                 title='Fejl',
                 message='Ugyldigt datoformat. Benyt venligst formatet YYYY-MM-DD, f.eks. 1935-4-24.'
@@ -95,13 +93,11 @@ class Controller(object):
         self.model.set_current_dato(new_dt)
         self.view.update()
 
-
     def change_date(self, new_date):
-        logger.info(f'Changing date')
+        logger.info('Changing date')
         self.persist_view()
         self.model.set_current_dato(new_date)
         self.view.update()
-
 
     def persist_view(self):
         logger.info('Persisting view')
@@ -118,7 +114,6 @@ class Controller(object):
         ]
         self.model[dt] = vagter
 
-
     def _guess_skifter(self, vagter):
         logger.info('Guessing skifter')
         guesses = [None, None, None, None, None, None]
@@ -128,16 +123,16 @@ class Controller(object):
             guesses[idx] = skifte
         return guesses
 
-
     def export_word(self):
         logger.info('Exporting to word')
-        self.view.show_info('Eksporter til word', 'Eksporter til word er ikke implementeret endnu')
-
+        self.view.show_info('Eksporter til word',
+                            'Eksporter til word er ikke implementeret endnu')
 
     def open_file(self):
         logger.info('Opening file')
         try:
-            filepath = self.view.ask_open_file(filetypes=[('Georg Stage Vagtplan', '*.gsv')])
+            filepath = self.view.ask_open_file(
+                filetypes=[('Georg Stage Vagtplan', '*.gsv')])
             logger.info(f'loading file: {filepath}')
             model = GeorgStage.load(filepath)
             self.model = model
@@ -145,12 +140,13 @@ class Controller(object):
             self.view.update()
         except Exception as e:
             logger.exception(e)
-            self.view.show_warning('Fejl', 'Der opstod en fejl under forsøget på at åbne din vagtplan. Check filformatet og prøv igen.')
-
+            self.view.show_warning(
+                'Fejl', 'Der opstod en fejl under forsøget på at åbne din vagtplan. Check filformatet og prøv igen.')
 
     def save_file_as(self):
         try:
-            filepath = self.view.ask_save_file_as(defaultextension='gsv', filetypes=[('Georg Stage Vagtplan', '*.gsv')])
+            filepath = self.view.ask_save_file_as(defaultextension='gsv', filetypes=[
+                                                  ('Georg Stage Vagtplan', '*.gsv')])
             if filepath is not None:
                 logger.info(f'Saving file: {filepath}')
                 self.persist_view()
@@ -158,8 +154,8 @@ class Controller(object):
                 self.view.show_info('Fil gemt', 'Din vagtplan er blevet gemt')
         except Exception as e:
             logger.exception(e)
-            self.view.show_warning('Fejl', 'Der opstod en fejl under forsøget på at gemme din vagtplan')
-
+            self.view.show_warning(
+                'Fejl', 'Der opstod en fejl under forsøget på at gemme din vagtplan')
 
     def get_help(self):
         header = 'Hjælp'
@@ -179,23 +175,24 @@ class Controller(object):
                     header = "Angiv skifte"
                     text = f"Hvilket skifte har vagt fra klokken {str(i*4).zfill(2)} - {str((i+1)*4).zfill(2)}"
                     skifte = self.view.ask_number(header, text)
-                    if skifte not in (1,2,3):
+                    if skifte not in (1, 2, 3):
                         raise ValueError(f'Skifte {skifte} not one of 1, 2, 3')
                     skifter[i] = skifte
             logger.info(f'Skifter: {skifter}')
             fill_result = self.model.autofill(dt, skifter)
             logger.info(fill_result)
             if fill_result.status != 1:
-                raise ValueError(f'Tjek at vagtplan er korrekt udfyldt')
-            #pdb.set_trace()
+                raise ValueError('Tjek at vagtplan er korrekt udfyldt')
+            # pdb.set_trace()
             self.model[dt] = fill_result.vagter
             self.view.update()
 
         except Exception as e:
             logger.exception(e)
-            self.view.show_warning("Fejl", f"Vagtplanen kan ikke udfyldes automatisk: {e}")
-
+            self.view.show_warning(
+                "Fejl", f"Vagtplanen kan ikke udfyldes automatisk: {e}")
 
     def show_stats(self):
         logger.info('Show stats clicked')
-        self.view.show_info('Stats', 'Statistikvisning er ikke implementeret endnu')
+        self.view.show_info(
+            'Stats', 'Statistikvisning er ikke implementeret endnu')

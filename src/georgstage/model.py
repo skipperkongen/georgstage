@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
-import os.path
-from typing import Tuple, List
+from typing import List
 
 from datetime import date
 from dateutil.parser import parse
-import numpy as np
 import pandas as pd
 import pulp as P
-import pdb
 
 N_GASTS = 60
 VAGT_TIDER = [0, 4, 8, 12, 16, 20]
@@ -52,10 +49,10 @@ class Vagt:
     @staticmethod
     def from_dict(d):
         return Vagt(
-            dato = d['dato'],
-            vagt_tid = d['vagt_tid'],
-            gast = d['gast'],
-            opgave = Opgave[d['opgave']]
+            dato=d['dato'],
+            vagt_tid=d['vagt_tid'],
+            gast=d['gast'],
+            opgave=Opgave[d['opgave']]
         )
 
 
@@ -77,7 +74,8 @@ class AutoFiller:
         Treat fysiske vagter special: sum of all fysiske, not just concrete
         """
         stats = {}
-        fysiske = (Opgave.ORDONNANS, Opgave.UDKIG, Opgave.BJAERGEMAERS, Opgave.RORGAENGER)
+        fysiske = (Opgave.ORDONNANS, Opgave.UDKIG,
+                   Opgave.BJAERGEMAERS, Opgave.RORGAENGER)
         for vagt in vagter:
             if vagt.opgave in fysiske:
                 keys = [(vagt.gast, opgave) for opgave in fysiske]
@@ -91,8 +89,8 @@ class AutoFiller:
         """
         Returns dataframe with rows = gaster, columns = opgaver, values = count
         """
-        counts = self.get_counts(vagter, N_GASTER)
-        df = pd.DataFrame(range(1, N_GASTER + 1), columns=['gast'])
+        counts = self.get_counts(vagter, N_GASTS)
+        df = pd.DataFrame(range(1, N_GASTS + 1), columns=['gast'])
         for opgave in Opgave:
             df[opgave.name] = df.gast.apply(lambda g: counts(g, opgave))
         return df
@@ -100,13 +98,12 @@ class AutoFiller:
     def get_skifte_for_gast(self, gast):
         if 0 < gast <= 20:
             return 1
-        elif  20 < gast <= 40:
+        elif 20 < gast <= 40:
             return 2
         else:
             return 3
 
-
-    def autofill(self, georgstage, dt, skifter=[1,2,3,1,2,3]):
+    def autofill(self, georgstage, dt, skifter=[1, 2, 3, 1, 2, 3]):
         """
         Limitation: vagthavende elev must be filled manually to ensure same gast
         morning and evening.
@@ -135,10 +132,10 @@ class AutoFiller:
         # Normal opgaver
         opgaver_norm = [o.value for o in Opgave if o.value not in opgaver_spec]
 
-
         # Decision variables (normal tasks)
         #   X_ijt: gast i, opgave j, hour t
-        X = P.LpVariable.dicts('X', (gaster, opgaver, VAGT_TIDER), 0, 1, P.LpBinary)
+        X = P.LpVariable.dicts(
+            'X', (gaster, opgaver, VAGT_TIDER), 0, 1, P.LpBinary)
 
         lookup = self.get_counts(day_vagter + other_vagter)
 
@@ -156,28 +153,30 @@ class AutoFiller:
             for t in VAGT_TIDER
         ])
 
-        ## preassigned day vagter must be assigned
+        # preassigned day vagter must be assigned
         for vagt in day_vagter:
             prob += X[vagt.gast][vagt.opgave.value][vagt.vagt_tid] == 1
 
-        ## all tasks except:
-        ## - UDE, PEJLEGAST_A, PEJLEGAST_B, DAEKSELEV_I_KABYS
-        ## must be assigned exactly once per vagt_tid
+        # all tasks except:
+        # - UDE, PEJLEGAST_A, PEJLEGAST_B, DAEKSELEV_I_KABYS
+        # must be assigned exactly once per vagt_tid
         for j in opgaver_norm:
             for t in VAGT_TIDER:
                 prob += P.lpSum(
                     [X[i][j][t]
-                    for i in gaster
-                ]) == 1
+                     for i in gaster
+                     ]) == 1
 
-        ## Pejlegaster only 16-20 vagt
+        # Pejlegaster only 16-20 vagt
         for t in VAGT_TIDER:
             # Set RHS to 1 if vagt_tid is 16, else 0
             rhs = 1 if t == 16 else 0
-            prob += P.lpSum([X[i][Opgave.PEJLEGAST_A.value][t]for i in gaster]) == rhs
-            prob += P.lpSum([X[i][Opgave.PEJLEGAST_B.value][t]for i in gaster]) == rhs
+            prob += P.lpSum([X[i][Opgave.PEJLEGAST_A.value][t]
+                            for i in gaster]) == rhs
+            prob += P.lpSum([X[i][Opgave.PEJLEGAST_B.value][t]
+                            for i in gaster]) == rhs
 
-        ## Dæks elev i kabys. Only 4, 8, 12, 16
+        # Dæks elev i kabys. Only 4, 8, 12, 16
         for t in VAGT_TIDER:
             # Set RHS to 1 if vagt_tid is 16, else 0
             rhs = 1 if t in [4, 8, 12, 16] else 0
@@ -186,14 +185,15 @@ class AutoFiller:
                 for i in gaster
             ]) == rhs
 
-        ## gasts can have at most one task per shift
+        # gasts can have at most one task per shift
         for i in gaster:
             for t in VAGT_TIDER:
                 prob += P.lpSum([X[i][j][t] for j in opgaver]) <= 1
 
-        ## gasts can take zero tasks outside their own shift
+        # gasts can take zero tasks outside their own shift
         for idx, skifte in enumerate(skifter):
-            gaster_inactive = [i for i in gaster if self.get_skifte_for_gast(i) != skifte]
+            gaster_inactive = [
+                i for i in gaster if self.get_skifte_for_gast(i) != skifte]
             t = VAGT_TIDER[idx]
             prob += P.lpSum([
                 X[i][j][t]
@@ -209,7 +209,8 @@ class AutoFiller:
                 for vagt_tid in VAGT_TIDER:
                     x = X[gast][opgave][vagt_tid]
                     if x.varValue == 1:
-                        vagter.append(Vagt(datestr, vagt_tid, gast, Opgave(opgave)))
+                        vagter.append(
+                            Vagt(datestr, vagt_tid, gast, Opgave(opgave)))
 
         stats = [lookup(vagt.gast, vagt.opgave) for vagt in vagter]
 
@@ -221,7 +222,7 @@ class GeorgStage:
     def __init__(self, vagter, auto_filler=AutoFiller()):
         self._vagter = {}
         for vagt in vagter:
-            assert(type(vagt) == Vagt)
+            assert (type(vagt) == Vagt)
             self._vagter.setdefault(vagt.dato, []).append(vagt)
         datoer = self.get_datoer()
         self.current_dato = datoer[-1] if len(datoer) else None
@@ -281,12 +282,13 @@ class GeorgStage:
         before = parse(str(before)).date()
         result = []
         for dato, values in self._vagter.items():
-            if (before and dato >= before): continue
+            if (before and dato >= before):
+                continue
             for vagt in values:
                 result.append(vagt)
         return result
 
-    def autofill(self, dt, skifter=[1,2,3,1,2,3]):
+    def autofill(self, dt, skifter=[1, 2, 3, 1, 2, 3]):
         """
         Returns a FillResult
         """
@@ -299,7 +301,6 @@ class GeorgStage:
             return pd.DataFrame(rows)
         else:
             return pd.DataFrame(rows, columns=columns)
-
 
     def save(self, filepath):
         df = self.to_dataframe()
