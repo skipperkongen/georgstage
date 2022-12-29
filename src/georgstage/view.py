@@ -24,6 +24,7 @@ class View(tk.Tk):
         self.controller = controller
         self.model = model
         self.title('Georg Stage vagtplanlægger')
+        self.configure(bg='#A9CCE3')
         # Register validator
 
         def is_gast_or_empty(str):
