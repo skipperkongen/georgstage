@@ -100,13 +100,22 @@ class AutoFiller:
             for j in opgaver:
                 coef.setdefault(i, {})[j] = lookup(i, Opgave(j))
 
+        # penalty for every time gast performs same task during day
+        total_penalty = 0
+        for i in gaster:
+            for j in opgaver:
+                penalty = 2*P.lpSum([X[i][j][t] for t in VAGT_TIDER])
+                total_penalty += penalty
+
         # Objective function
         prob += P.lpSum([
             coef[i][j] * X[i][j][t]
             for i in gaster
             for j in opgaver
             for t in VAGT_TIDER
-        ])
+        ]) + total_penalty
+
+        # Constraints
 
         # preassigned day vagter must be assigned
         for vagt in day_vagter:

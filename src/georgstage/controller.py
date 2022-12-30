@@ -102,6 +102,9 @@ class Controller(object):
         self.view.update()
 
     def persist_view(self):
+        """
+        Store fields from view in model
+        """
         logger.info('Persisting view')
         # translate dt and export_vars to vagter
         dt = self.model.get_current_dato()
