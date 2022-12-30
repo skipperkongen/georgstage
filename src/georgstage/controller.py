@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from dateutil.parser import parse
 import logging
+from georgstage.autofill import AutoFiller
 
 from georgstage.model import GeorgStage, Vagt, Opgave
 from georgstage.view import View
@@ -11,10 +12,11 @@ logger = logging.getLogger()
 class Controller(object):
     """docstring for Controller."""
 
-    def __init__(self):
+    def __init__(self, autofiller=AutoFiller()):
         model = GeorgStage([])
         self.model = model
         self.view = View(self, model)
+        self.autofiller = autofiller
 
     def main(self):
         logger.info('In main of controller')
@@ -179,7 +181,7 @@ class Controller(object):
                         raise ValueError(f'Skifte {skifte} not one of 1, 2, 3')
                     skifter[i] = skifte
             logger.info(f'Skifter: {skifter}')
-            fill_result = self.model.autofill(dt, skifter)
+            fill_result = self.autofiller.autofill(self.model, skifter)
             logger.info(fill_result)
             if fill_result.status != 1:
                 raise ValueError('Tjek at vagtplan er korrekt udfyldt')
