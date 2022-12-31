@@ -106,9 +106,10 @@ def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
         ]) == 0
 
     # gasts can not be assigned two times to same task
-    day_gaster = {vagt.gast for vagt in day_vagter}
-    not_day_gaster = {gast for gast in gaster if gast not in day_gaster}
-    for i in not_day_gaster:
+    # Note: does not apply to manually assigned gasts
+    manual_gaster = {vagt.gast for vagt in day_vagter}
+    not_manual_gaster = {gast for gast in gaster if gast not in manual_gaster}
+    for i in not_manual_gaster:
         for j in opgaver:
             prob += P.lpSum([X[i][j][t] for t in VAGT_TIDER]) <= 1
 
