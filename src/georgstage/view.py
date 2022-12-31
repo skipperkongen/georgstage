@@ -41,7 +41,7 @@ class View(tk.Tk):
         self.update()
 
     def main(self):
-        logger.info('In main of view ')
+        logger.debug('In main of view ')
         self.mainloop()
 
     def _make_gui(self):
@@ -340,7 +340,7 @@ class View(tk.Tk):
             self._vars[key].set(text)
 
     def update(self):
-        logger.info('Updating')
+        logger.debug('Updating')
         # get model state
         dt = self.model.get_current_dato()
         datoer = self.model.get_datoer()
@@ -378,7 +378,7 @@ class View(tk.Tk):
         return self.current_date.get()
 
     def _clear_screen(self):
-        logger.info('Resetting variables')
+        logger.debug('Resetting variables')
         for var in self._vars.values():
             var.set('')
 
