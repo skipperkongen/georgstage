@@ -1,17 +1,18 @@
+from typing import List
 import pulp as P
 
-from georgstage.model import Opgave, Vagt
+from georgstage.model import GeorgStage, Opgave, Vagt
 from georgstage.autofill import N_GASTS, VAGT_TIDER, FillResult, get_counts, get_skifte_for_gast
 
 
-def autofill(model, skifter=[1, 2, 3, 1, 2, 3]):
+def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
     """
     Limitation: vagthavende elev must be filled manually to ensure same gast
     morning and evening.
     """
     datestr = str(model.get_current_dato())
-    day_vagter = model[datestr]
-    other_vagter = list(model.get_vagter(before=datestr))
+    day_vagter: List[Vagt] = model[datestr]
+    other_vagter: List[Vagt] = list(model.get_vagter(before=datestr))
     lookup = get_counts(day_vagter + other_vagter)
 
     # Problem
@@ -105,8 +106,10 @@ def autofill(model, skifter=[1, 2, 3, 1, 2, 3]):
         ]) == 0
 
     # gasts can not be assigned two times to same task
-    total_penalty = 0
-    for i in gaster:
+    # Note: does not apply to manually assigned gasts
+    manual_gaster = {vagt.gast for vagt in day_vagter}
+    not_manual_gaster = {gast for gast in gaster if gast not in manual_gaster}
+    for i in not_manual_gaster:
         for j in opgaver:
             prob += P.lpSum([X[i][j][t] for t in VAGT_TIDER]) <= 1
 
