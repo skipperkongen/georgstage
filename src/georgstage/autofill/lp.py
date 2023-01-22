@@ -69,7 +69,7 @@ def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
             prob += P.lpSum(
                 [X[i][j][t]
                     for i in gaster
-                    ]) == 1
+                 ]) == 1
 
     # Pejlegaster only 16-20 vagt
     for t in VAGT_TIDER:
@@ -112,7 +112,6 @@ def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
     for i in not_manual_gaster:
         for j in opgaver:
             prob += P.lpSum([X[i][j][t] for t in VAGT_TIDER]) <= 1
-
 
     # Solve
     status = prob.solve()
