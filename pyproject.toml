@@ -8,7 +8,7 @@ authors = [
     { name = "Pimin Konstantin Kefaloukos", email = "skipperkongen@gmail.com" }
 ]
 description = "Library for Georg Stage"
-version = "0.2.14"
+version = "0.2.15"
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
