@@ -32,24 +32,12 @@ python src/cli.py
 
 ## Publicer ny version
 
-> Husk altid at køre tests før du publicerer. TODO: automatiser tests
+1. opdater versionsnummer i pyproject.toml
+1. git commit -am 'besked'
+1. git push
+1. [På GitHub] opret ny version med matchende versionsnummer, dog med 'v' prefix.
 
-Kør test:
-
-```
-# pip install -e '.[test]'
-make lint
-make test
-```
-
-Hvis en version er tagget med 'v*', f.eks. 'v0.0.1', så vil en Github action
-sørge for at der bliver bygget executables til Windows og Mac OS.
-
-```bash
-# Husk: skift version til den rigtige
-git tag v0.0.1 master
-git push origin v0.0.1
-```
+Herefter offentliggøres ny version automatisk på PyPI via en Github Action.  
 
 ## Brugervejledning
 
@@ -152,7 +140,7 @@ Der findes også ankervagter, men det kører en smule anderledes.
 
 ## Til udviklere
 
-> Se https://trello.com/b/nId6IuH1/georg-stage  
+> Se [opgavestyring (Kanban)](https://github.com/users/skipperkongen/projects/2/)
 
 ### Sådan kører du tests
 
@@ -162,12 +150,3 @@ Ved hjælp af make:
 make test
 ```
 
-### Sådan publicerer du en ny version
-
-Trin (kan måske forbedre):
-
-1. Opdater version and download_url felter i setup.py
-1. Kør git add + commit + push
-1. Opret ny release på GitHub (check source-code link, skal matche download_url i setup.py)
-1. Kør `python setup.py sdist`
-1. Kør `twine upload dist/* --verbose` (hvis ej installet, kør `pip install twine` først)
