@@ -5,6 +5,8 @@ Matematikken bag programmet benytter lineær programming (LP) til at optimere va
 således at alle opgaver varetages, samtidigt med at opgaverne fordeles mellem
 gasterne så fair som muligt.
 
+> [Opgavestyring (Kanban)](https://github.com/users/skipperkongen/projects/2/)
+
 ## Installation
 
 Til lokal udvikling:
@@ -12,14 +14,14 @@ Til lokal udvikling:
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -e '.[test]'
+pip install -e '.[tests]'
 ```
 
 Kør tests:
 
 ```
-make test
 make lint
+make test
 ```
 
 Start program:
@@ -27,7 +29,7 @@ Start program:
 ```
 make run_local
 # or
-python src/cli.py
+python -m georgstage
 ```
 
 ## Publicer ny version
@@ -41,7 +43,7 @@ Herefter offentliggøres ny version automatisk på PyPI via en Github Action.
 
 ## Brugervejledning
 
-Kommer snart...
+Spørg Kostas
 
 ### Kode eksempler
 
@@ -137,16 +139,4 @@ skifte får to perioder per dag
 
 Der findes også ankervagter, men det kører en smule anderledes.
 
-
-## Til udviklere
-
-> Se [opgavestyring (Kanban)](https://github.com/users/skipperkongen/projects/2/)
-
-### Sådan kører du tests
-
-Ved hjælp af make:
-
-```
-make test
-```
 
