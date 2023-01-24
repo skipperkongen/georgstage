@@ -58,6 +58,17 @@ class Controller(object):
             if vagt.opgave == Opgave.PEJLEGAST_B:
                 logger.debug(vagt)
                 return Vagt(dato=dt, vagt_tid=16, gast=vagt.gast, opgave=Opgave.PEJLEGAST_A)
+    
+    def guess_ude(self, dt):
+        yesterday = dt - timedelta(days=1)
+        logger.debug(f'{dt}, {yesterday}')
+        logger.debug(f'Inspecting vagter {yesterday}: {self.model[yesterday]}')
+        ude = []
+        for vagt in self.model[yesterday]:
+            if vagt.opgave == Opgave.UDE:
+                logger.debug(vagt)
+                ude.append(Vagt(dato=dt, vagt_tid=vagt.vagt_tid, gast=vagt.gast, opgave=Opgave.UDE))
+        return ude                
 
     def create_date(self):
         logger.debug('Creating date')
@@ -92,6 +103,9 @@ class Controller(object):
         pejlegast_a = self.guess_pejlegast_a(new_dt)
         if pejlegast_a is not None:
             vagter.append(pejlegast_a)
+        ude = self.guess_ude(new_dt)
+        for vagt in ude:
+            vagter.append(vagt)
         self.model[new_dt] = vagter
         self.model.set_current_dato(new_dt)
         self.view.update()
