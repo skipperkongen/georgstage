@@ -1,6 +1,6 @@
 import logging
 import tkinter as tk
-from tkinter import filedialog, messagebox, simpledialog
+from tkinter import filedialog, messagebox, simpledialog, ttk
 
 from dateutil.parser import parse
 
@@ -32,12 +32,6 @@ class View(tk.Tk):
         self.vcmd = (self.register(is_gast_or_empty), '%P')
         # Create UI
         self._make_gui()
-        # self._make_vars()
-        # self._make_main_frame()
-        # self._make_menu()
-        # self._make_labels()
-        # self._make_dropdown()
-        # self._make_entries()
         self.update()
 
     def main(self):
@@ -443,6 +437,23 @@ class View(tk.Tk):
             text,
             parent=self.main_frm
         )
+
+    def show_table(self, rows, columns_labels, row_labels):
+        # Create secondary (or popup) window.
+        table_window = tk.Toplevel()
+        table_window.title(f"Tabel")
+        frame = tk.Frame(table_window, bg='White')
+        frame.pack(padx=self.PAD, pady=self.PAD, side=tk.TOP)
+        for i, label in enumerate(columns_labels):
+            tk.Label(frame, bg='White', text=label).grid(
+                row=0, column=i+1, sticky=tk.E)
+        for i, label in enumerate(row_labels):
+            tk.Label(frame, bg='White', text=label).grid(
+                row=i+1, column=0, sticky=tk.E)
+        for i, row in enumerate(rows):
+            for j, item in enumerate(row):
+                tk.Label(frame, bg='White', text=str(item)).grid(
+                    row=i+1, column=j+1, sticky=tk.E)
 
     def _on_date_selected(self, a, b, c):
         if self.current_date.get() == NO_DATE:

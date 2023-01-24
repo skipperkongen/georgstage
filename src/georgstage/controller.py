@@ -1,9 +1,10 @@
 from datetime import date, timedelta
-from dateutil.parser import parse
 import logging
-from georgstage.autofill import lp
-# from georgstage.autofill import greedy
 
+from dateutil.parser import parse
+import numpy as np
+
+from georgstage.autofill import lp
 from georgstage.model import GeorgStage, Vagt, Opgave
 from georgstage.view import View
 
@@ -58,7 +59,7 @@ class Controller(object):
             if vagt.opgave == Opgave.PEJLEGAST_B:
                 logger.debug(vagt)
                 return Vagt(dato=dt, vagt_tid=16, gast=vagt.gast, opgave=Opgave.PEJLEGAST_A)
-    
+
     def guess_ude(self, dt):
         yesterday = dt - timedelta(days=1)
         logger.debug(f'{dt}, {yesterday}')
@@ -67,8 +68,9 @@ class Controller(object):
         for vagt in self.model[yesterday]:
             if vagt.opgave == Opgave.UDE:
                 logger.debug(vagt)
-                ude.append(Vagt(dato=dt, vagt_tid=vagt.vagt_tid, gast=vagt.gast, opgave=Opgave.UDE))
-        return ude                
+                ude.append(Vagt(dato=dt, vagt_tid=vagt.vagt_tid,
+                           gast=vagt.gast, opgave=Opgave.UDE))
+        return ude
 
     def create_date(self):
         logger.debug('Creating date')
@@ -203,7 +205,6 @@ class Controller(object):
             logger.debug(fill_result)
             if fill_result.status != 1:
                 raise ValueError('Tjek at vagtplan er korrekt udfyldt')
-            # pdb.set_trace()
             self.model[dt] = fill_result.vagter
             self.view.update()
 
@@ -214,5 +215,8 @@ class Controller(object):
 
     def show_stats(self):
         logger.debug('Show stats clicked')
-        self.view.show_info(
-            'Stats', 'Statistikvisning er ikke implementeret endnu')
+        col_labels = [opgave.name for opgave in Opgave]
+        row_labels = [x+1 for x in range(63)]
+        rows = np.zeros((len(row_labels), len(col_labels))).astype(int)
+
+        self.view.show_table(rows, col_labels, row_labels)
