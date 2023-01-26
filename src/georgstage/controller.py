@@ -1,11 +1,12 @@
 from datetime import date, timedelta
-from dateutil.parser import parse
 import logging
-from georgstage.autofill import lp
-# from georgstage.autofill import greedy
 
+from dateutil.parser import parse
+import numpy as np
+
+from georgstage.autofill import lp
 from georgstage.model import GeorgStage, Vagt, Opgave
-from georgstage.view import View
+from georgstage.view import View, LABELS
 
 logger = logging.getLogger()
 
@@ -58,7 +59,7 @@ class Controller(object):
             if vagt.opgave == Opgave.PEJLEGAST_B:
                 logger.debug(vagt)
                 return Vagt(dato=dt, vagt_tid=16, gast=vagt.gast, opgave=Opgave.PEJLEGAST_A)
-    
+
     def guess_ude(self, dt):
         yesterday = dt - timedelta(days=1)
         logger.debug(f'{dt}, {yesterday}')
@@ -67,8 +68,9 @@ class Controller(object):
         for vagt in self.model[yesterday]:
             if vagt.opgave == Opgave.UDE:
                 logger.debug(vagt)
-                ude.append(Vagt(dato=dt, vagt_tid=vagt.vagt_tid, gast=vagt.gast, opgave=Opgave.UDE))
-        return ude                
+                ude.append(Vagt(dato=dt, vagt_tid=vagt.vagt_tid,
+                           gast=vagt.gast, opgave=Opgave.UDE))
+        return ude
 
     def create_date(self):
         logger.debug('Creating date')
@@ -203,7 +205,6 @@ class Controller(object):
             logger.debug(fill_result)
             if fill_result.status != 1:
                 raise ValueError('Tjek at vagtplan er korrekt udfyldt')
-            # pdb.set_trace()
             self.model[dt] = fill_result.vagter
             self.view.update()
 
@@ -214,5 +215,31 @@ class Controller(object):
 
     def show_stats(self):
         logger.debug('Show stats clicked')
-        self.view.show_info(
-            'Stats', 'Statistikvisning er ikke implementeret endnu')
+        gast = self.view.ask_number('Vis statistik', 'Indtast gast')
+        df = self.model.to_dataframe()
+        s = df[df.gast == gast].groupby(df.opgave).count().opgave
+        n_vagthavende = s.get('VAGTHAVENDE_ELEV') or 0
+        n_fysisk = (s.get('ORDONNANS') or 0) + (s.get('UDKIG') or 0) + (s.get('BJAERGEMAERS') or 0) + (s.get('RORGAENGER') or 0)
+        n_kabys = s.get('DAEKSELEV_I_KABYS') or 0
+        n_pejlegast =  (s.get('PEJLEGAST_A') or 0) + (s.get('PEJLEGAST_B') or 0)
+        n_udsaet = (
+            (s.get('UDSAETNINGSGAST_A') or 0)
+            + (s.get('UDSAETNINGSGAST_B') or 0)
+            + (s.get('UDSAETNINGSGAST_C') or 0)
+            + (s.get('UDSAETNINGSGAST_D') or 0)
+            + (s.get('UDSAETNINGSGAST_E') or 0)
+        )
+        n_ude = (s.get('UDE') or 0)
+        
+        col_labels = ['Antal gange']
+        row_labels = ['Vagthavende elev', 'Fysisk vagt', 'Kabys', 'Pejlegast', 'Udsætningsgast', 'Ude/HU']
+        rows = np.expand_dims([
+            n_vagthavende,
+            n_fysisk,
+            n_kabys,
+            n_pejlegast,
+            n_udsaet,
+            n_ude
+        ], axis=1)
+
+        self.view.show_table(rows, col_labels, row_labels, header='Statistik for gast')
