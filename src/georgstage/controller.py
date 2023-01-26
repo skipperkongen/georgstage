@@ -6,7 +6,7 @@ import numpy as np
 
 from georgstage.autofill import lp
 from georgstage.model import GeorgStage, Vagt, Opgave
-from georgstage.view import View
+from georgstage.view import View, LABELS
 
 logger = logging.getLogger()
 
@@ -217,10 +217,29 @@ class Controller(object):
         logger.debug('Show stats clicked')
         gast = self.view.ask_number('Vis statistik', 'Indtast gast')
         df = self.model.to_dataframe()
-        res = df[df.gast == gast].groupby(df.opgave).count()
+        s = df[df.gast == gast].groupby(df.opgave).count().opgave
+        n_vagthavende = s.get('VAGTHAVENDE_ELEV') or 0
+        n_fysisk = (s.get('ORDONNANS') or 0) + (s.get('UDKIG') or 0) + (s.get('BJAERGEMAERS') or 0) + (s.get('RORGAENGER') or 0)
+        n_kabys = s.get('DAEKSELEV_I_KABYS') or 0
+        n_pejlegast =  (s.get('PEJLEGAST_A') or 0) + (s.get('PEJLEGAST_B') or 0)
+        n_udsaet = (
+            (s.get('UDSAETNINGSGAST_A') or 0)
+            + (s.get('UDSAETNINGSGAST_B') or 0)
+            + (s.get('UDSAETNINGSGAST_C') or 0)
+            + (s.get('UDSAETNINGSGAST_D') or 0)
+            + (s.get('UDSAETNINGSGAST_E') or 0)
+        )
+        n_ude = (s.get('UDE') or 0)
         
-        col_labels = ['Antal vagter']
-        row_labels = res.index
-        rows = np.expand_dims(res.opgave.values, axis=1)
+        col_labels = ['Antal gange']
+        row_labels = ['Vagthavende elev', 'Fysisk vagt', 'Kabys', 'Pejlegast', 'Udsætningsgast', 'Ude/HU']
+        rows = np.expand_dims([
+            n_vagthavende,
+            n_fysisk,
+            n_kabys,
+            n_pejlegast,
+            n_udsaet,
+            n_ude
+        ], axis=1)
 
-        self.view.show_table(rows, col_labels, row_labels)
+        self.view.show_table(rows, col_labels, row_labels, header='Statistik for gast')

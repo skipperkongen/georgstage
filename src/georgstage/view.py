@@ -10,6 +10,23 @@ logger = logging.getLogger()
 
 NO_DATE = '-'
 
+LABELS = {
+    Opgave.VAGTHAVENDE_ELEV: 'Vagthavende elev',
+    Opgave.ORDONNANS: 'Ordonnans',
+    Opgave.UDKIG: 'Udkig',
+    Opgave.BJAERGEMAERS: 'Bjærgemærs',
+    Opgave.RORGAENGER: 'Rorgænger',
+    Opgave.UDSAETNINGSGAST_A: 'Udsætningsgast A',
+    Opgave.UDSAETNINGSGAST_B: 'Udsætningsgast B',
+    Opgave.UDSAETNINGSGAST_C: 'Udsætningsgast C',
+    Opgave.UDSAETNINGSGAST_D: 'Udsætningsgast D',
+    Opgave.UDSAETNINGSGAST_E: 'Udsætningsgast E',
+    Opgave.PEJLEGAST_A: 'Pejlegast A',
+    Opgave.PEJLEGAST_B: 'Pejlegast B',
+    Opgave.DAEKSELEV_I_KABYS: 'Dækselev i kabys',
+    Opgave.UDE: 'Ude/HU'   
+}
+
 
 class View(tk.Tk):
     """docstring for View."""
@@ -438,10 +455,10 @@ class View(tk.Tk):
             parent=self.main_frm
         )
 
-    def show_table(self, rows, columns_labels, row_labels):
+    def show_table(self, rows, columns_labels, row_labels, header='Tabel'):
         # Pop-up window.
         table_window = tk.Toplevel()
-        table_window.title(f"Tabel")
+        table_window.title(header)
         # Frame
         frame = tk.Frame(table_window, bg='White')
         frame.pack(padx=self.PAD, pady=self.PAD, side=tk.TOP)
@@ -455,10 +472,6 @@ class View(tk.Tk):
             for j, item in enumerate(row):
                 tk.Label(frame, bg='White', text=str(item)).grid(
                     row=i+1, column=j+1, sticky=tk.E)
-        # Vertical scrollbar
-        # scrollbar
-        my_scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=frame.yview)
-        my_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)        
 
     def _on_date_selected(self, a, b, c):
         if self.current_date.get() == NO_DATE:
