@@ -439,9 +439,10 @@ class View(tk.Tk):
         )
 
     def show_table(self, rows, columns_labels, row_labels):
-        # Create secondary (or popup) window.
+        # Pop-up window.
         table_window = tk.Toplevel()
         table_window.title(f"Tabel")
+        # Frame
         frame = tk.Frame(table_window, bg='White')
         frame.pack(padx=self.PAD, pady=self.PAD, side=tk.TOP)
         for i, label in enumerate(columns_labels):
@@ -454,6 +455,10 @@ class View(tk.Tk):
             for j, item in enumerate(row):
                 tk.Label(frame, bg='White', text=str(item)).grid(
                     row=i+1, column=j+1, sticky=tk.E)
+        # Vertical scrollbar
+        # scrollbar
+        my_scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=frame.yview)
+        my_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)        
 
     def _on_date_selected(self, a, b, c):
         if self.current_date.get() == NO_DATE:

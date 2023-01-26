@@ -215,8 +215,12 @@ class Controller(object):
 
     def show_stats(self):
         logger.debug('Show stats clicked')
-        col_labels = [opgave.name for opgave in Opgave]
-        row_labels = [x+1 for x in range(63)]
-        rows = np.zeros((len(row_labels), len(col_labels))).astype(int)
+        gast = self.view.ask_number('Vis statistik', 'Indtast gast')
+        df = self.model.to_dataframe()
+        res = df[df.gast == gast].groupby(df.opgave).count()
+        
+        col_labels = ['Antal vagter']
+        row_labels = res.index
+        rows = np.expand_dims(res.opgave.values, axis=1)
 
         self.view.show_table(rows, col_labels, row_labels)
