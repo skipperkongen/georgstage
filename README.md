@@ -14,7 +14,7 @@ Se [Kanban](https://github.com/users/skipperkongen/projects/2/) for opgaver der 
 Installation med pip:
 
 ```shell
-pip install georgstage
+pip install georgstage --no-cache-dir
 ```
 
 Kør:
@@ -52,7 +52,7 @@ python -m georgstage
 1. opdater versionsnummer i pyproject.toml
 1. git commit -am 'besked'
 1. git push
-1. [På GitHub] opret ny version med matchende versionsnummer, dog med 'v' prefix.
+1. [På GitHub] opret ny release med matchende versionsnummer (tag og navn), dog med 'v' prefix.
 
 Herefter offentliggøres ny version automatisk på PyPI via en Github Action.  
 
