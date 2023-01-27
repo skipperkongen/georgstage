@@ -8,6 +8,7 @@ from georgstage.model import Opgave, Vagt
 
 N_GASTS = 60
 VAGT_TIDER = [0, 4, 8, 12, 16, 20]
+VAGT_TIDER_OG_DAG = VAGT_TIDER + [-1]  # -1 betyder "hele dagen"
 
 
 @dataclass

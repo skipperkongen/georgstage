@@ -20,7 +20,8 @@ class Opgave(Enum):
     PEJLEGAST_A = 10
     PEJLEGAST_B = 11
     DAEKSELEV_I_KABYS = 12
-    UDE = 13
+    HU = 13
+    UDE = 14
 
 
 @dataclass

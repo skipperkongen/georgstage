@@ -68,7 +68,7 @@ class Controller(object):
         for vagt in self.model[yesterday]:
             if vagt.opgave == Opgave.UDE:
                 logger.debug(vagt)
-                ude.append(Vagt(dato=dt, vagt_tid=vagt.vagt_tid,
+                ude.append(Vagt(dato=dt, vagt_tid=-1,
                            gast=vagt.gast, opgave=Opgave.UDE))
         return ude
 
@@ -140,6 +140,7 @@ class Controller(object):
         logger.debug('Guessing skifter')
         guesses = [None, None, None, None, None, None]
         for vagt in vagter:
+            if vagt.opgave == Opgave.UDE: continue
             skifte = 1 + vagt.gast // 20
             idx = vagt.vagt_tid // 4
             guesses[idx] = skifte

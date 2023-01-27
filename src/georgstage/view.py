@@ -24,7 +24,8 @@ LABELS = {
     Opgave.PEJLEGAST_A: 'Pejlegast A',
     Opgave.PEJLEGAST_B: 'Pejlegast B',
     Opgave.DAEKSELEV_I_KABYS: 'Dækselev i kabys',
-    Opgave.UDE: 'Ude/HU'   
+    Opgave.HU: 'HU',
+    Opgave.UDE: 'Ude (hele dagen)'
 }
 
 
@@ -106,29 +107,29 @@ class View(tk.Tk):
         tk.Label(self.main_frm, bg='White', text='').grid(
             row=1, column=0, sticky=tk.E)
         # Opgave labels
-        tk.Label(self.main_frm, bg='White', text='Vagthavende elev').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.VAGTHAVENDE_ELEV]).grid(
             row=2, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Ordonnans').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.ORDONNANS]).grid(
             row=3, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Udkig').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.UDKIG]).grid(
             row=4, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Bjærgemærs').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.BJAERGEMAERS]).grid(
             row=5, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Rorgænger').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.RORGAENGER]).grid(
             row=6, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Udsætningsgast A').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.UDSAETNINGSGAST_A]).grid(
             row=7, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Udsætningsgast B').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.UDSAETNINGSGAST_B]).grid(
             row=8, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Udsætningsgast C').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.UDSAETNINGSGAST_C]).grid(
             row=9, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Udsætningsgast D').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.UDSAETNINGSGAST_D]).grid(
             row=10, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Udsætningsgast E').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.UDSAETNINGSGAST_E]).grid(
             row=11, column=0, sticky=tk.E)
         tk.Label(self.main_frm, bg='White',
                  text='Pejlegast A/B').grid(row=12, column=0, sticky=tk.E)
-        tk.Label(self.main_frm, bg='White', text='Dækselev i kabys').grid(
+        tk.Label(self.main_frm, bg='White', text=LABELS[Opgave.DAEKSELEV_I_KABYS]).grid(
             row=13, column=0, sticky=tk.E)
         # Tidspunkt labels
         tk.Label(self.main_frm, bg='White', text='08 - 12',
@@ -146,8 +147,16 @@ class View(tk.Tk):
         # Spacer
         tk.Label(self.main_frm, bg='White', text='').grid(
             row=14, column=0, sticky=tk.E)
+        # HU
         tk.Label(self.main_frm, bg='White',
-                 text='Ude/HU').grid(row=15, column=0, sticky=tk.E)
+                 text=LABELS[Opgave.HU]).grid(row=15, column=0, sticky=tk.E)
+        # Spacer
+        tk.Label(self.main_frm, bg='White', text='').grid(
+            row=16, column=0, sticky=tk.E)
+        # Ude
+        tk.Label(self.main_frm, bg='White',
+                 text=LABELS[Opgave.UDE]).grid(row=17, column=0, sticky=tk.E)
+
 
         # Make dropdown
         date_list = [NO_DATE]
@@ -280,53 +289,20 @@ class View(tk.Tk):
 
         # Ude/HU
         # 8-12
-        tk.Entry(
-            self.main_frm,
-            justify='right',
-            textvariable=self._vars.setdefault(
-                (Opgave.UDE, 8), tk.StringVar(self)),
-            width=self.WIDTH
-        ).grid(row=15, column=1, sticky=tk.E)
+        self._make_list_entry(opgave=Opgave.HU, tid=8, row=15, col=1)
         # 12-16
-        tk.Entry(
-            self.main_frm,
-            justify='right',
-            textvariable=self._vars.setdefault(
-                (Opgave.UDE, 12), tk.StringVar(self)),
-            width=self.WIDTH
-        ).grid(row=15, column=2, sticky=tk.E)
+        self._make_list_entry(opgave=Opgave.HU, tid=12, row=15, col=2)
         # 16-20
-        tk.Entry(
-            self.main_frm,
-            justify='right',
-            textvariable=self._vars.setdefault(
-                (Opgave.UDE, 16), tk.StringVar(self)),
-            width=self.WIDTH
-        ).grid(row=15, column=3, sticky=tk.E)
+        self._make_list_entry(opgave=Opgave.HU, tid=16, row=15, col=3)
         # 20-24
-        tk.Entry(
-            self.main_frm,
-            justify='right',
-            textvariable=self._vars.setdefault(
-                (Opgave.UDE, 20), tk.StringVar(self)),
-            width=self.WIDTH
-        ).grid(row=15, column=4, sticky=tk.E)
+        self._make_list_entry(opgave=Opgave.HU, tid=20, row=15, col=4)
         # 00-04
-        tk.Entry(
-            self.main_frm,
-            justify='right',
-            textvariable=self._vars.setdefault(
-                (Opgave.UDE, 0), tk.StringVar(self)),
-            width=self.WIDTH
-        ).grid(row=15, column=5, sticky=tk.E)
+        self._make_list_entry(opgave=Opgave.HU, tid=0, row=15, col=5)
         # 04-08
-        tk.Entry(
-            self.main_frm,
-            justify='right',
-            textvariable=self._vars.setdefault(
-                (Opgave.UDE, 4), tk.StringVar(self)),
-            width=self.WIDTH
-        ).grid(row=15, column=6, sticky=tk.E)
+        self._make_list_entry(opgave=Opgave.HU, tid=4, row=15, col=6)
+
+        # Ude
+        self._make_list_entry(opgave=Opgave.UDE, tid=-1, row=17, col=1, colspan=2)
 
     def _refresh_datoer(self, datoer):
         date_list = sorted([d.isoformat() for d in datoer])
@@ -338,17 +314,23 @@ class View(tk.Tk):
     def _refresh_vagter(self, vagter):
         # ugly, ugly HU handling
         hu_vagter = {}
+        ude_vagter = {}
         for vagt in vagter:
             key = (vagt.opgave, vagt.vagt_tid)
-            # pdb.set_trace()
-            if vagt.opgave == Opgave.UDE:
+            if vagt.opgave == Opgave.HU:
                 hu_vagter.setdefault(key, []).append(str(vagt.gast))
+            elif vagt.opgave == Opgave.UDE:
+                ude_vagter.setdefault(key, []).append(str(vagt.gast))
             else:
                 text = str(vagt.gast)
                 self._vars[key].set(text)
         for key, gaster in hu_vagter.items():
             text = ', '.join(gaster)
             self._vars[key].set(text)
+        for key, gaster in ude_vagter.items():
+            text = ', '.join(gaster)
+            self._vars[key].set(text)
+
 
     def update(self):
         logger.debug('Updating')
@@ -403,7 +385,17 @@ class View(tk.Tk):
             justify='right',
             textvariable=var,
             width=self.WIDTH
-        ).grid(row=row, column=col, sticky=tk.E)
+        ).grid(row=row, column=col, sticky=tk.W)
+
+    def _make_list_entry(self, opgave, tid, row, col, colspan=1, sticky=tk.W):
+        key = (opgave, tid)
+        var = self._vars.setdefault(key, tk.StringVar(self))
+        return tk.Entry(
+            self.main_frm,
+            justify='right',
+            textvariable=var,
+            width=self.WIDTH * colspan
+        ).grid(row=row, column=col, columnspan=colspan, sticky=sticky)
 
     def show_info(self, header, text):
         messagebox.showinfo(
