@@ -24,6 +24,15 @@ class Opgave(Enum):
     UDE = 14
 
 
+def get_skifte_for_gast(gast):
+    if 0 < gast <= 20:
+        return 1
+    elif 20 < gast <= 40:
+        return 2
+    else:
+        return 3
+
+
 @dataclass
 class Vagt:
     dato: date

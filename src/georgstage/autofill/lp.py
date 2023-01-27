@@ -1,8 +1,8 @@
 from typing import List
 import pulp as P
 
-from georgstage.model import GeorgStage, Opgave, Vagt
-from georgstage.autofill import N_GASTS, VAGT_TIDER, VAGT_TIDER_OG_DAG, FillResult, get_counts, get_skifte_for_gast
+from georgstage.model import GeorgStage, Opgave, Vagt, get_skifte_for_gast
+from georgstage.autofill import N_GASTS, VAGT_TIDER, VAGT_TIDER_OG_DAG, FillResult, get_counts
 
 
 def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]) -> FillResult:

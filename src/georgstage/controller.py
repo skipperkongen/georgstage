@@ -5,7 +5,7 @@ from dateutil.parser import parse
 import numpy as np
 
 from georgstage.autofill import lp
-from georgstage.model import GeorgStage, Vagt, Opgave
+from georgstage.model import GeorgStage, Vagt, Opgave, get_skifte_for_gast
 from georgstage.view import View, LABELS
 
 logger = logging.getLogger()
@@ -141,7 +141,7 @@ class Controller(object):
         guesses = [None, None, None, None, None, None]
         for vagt in vagter:
             if vagt.opgave == Opgave.UDE: continue
-            skifte = 1 + vagt.gast // 20
+            skifte = get_skifte_for_gast(vagt.gast)
             idx = vagt.vagt_tid // 4
             guesses[idx] = skifte
         return guesses
