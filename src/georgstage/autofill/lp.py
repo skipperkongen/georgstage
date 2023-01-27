@@ -1,11 +1,11 @@
 from typing import List
 import pulp as P
 
-from georgstage.model import GeorgStage, Opgave, Vagt
-from georgstage.autofill import N_GASTS, VAGT_TIDER, FillResult, get_counts, get_skifte_for_gast
+from georgstage.model import GeorgStage, Opgave, Vagt, get_skifte_for_gast
+from georgstage.autofill import N_GASTS, VAGT_TIDER, VAGT_TIDER_OG_DAG, FillResult, get_counts
 
 
-def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
+def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]) -> FillResult:
     """
     Limitation: vagthavende elev must be filled manually to ensure same gast
     morning and evening.
@@ -18,7 +18,10 @@ def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
     # Problem
     prob = P.LpProblem('udfyld_vagter', P.LpMinimize)
 
-    # All gaster
+    # Ude gaster
+    ude_gaster = [v.gast for v in day_vagter if v.opgave == Opgave.UDE]
+
+    # Alle gaster
     gaster = [gast for gast in range(1, N_GASTS+1)]
 
     # All opgaver
@@ -27,6 +30,7 @@ def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
     # Special opgaver
     opgaver_spec = [
         Opgave.UDE.value,
+        Opgave.HU.value,
         Opgave.DAEKSELEV_I_KABYS.value,
         Opgave.PEJLEGAST_A.value,
         Opgave.PEJLEGAST_B.value,
@@ -34,10 +38,10 @@ def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
     # Normal opgaver
     opgaver_norm = [o.value for o in Opgave if o.value not in opgaver_spec]
 
-    # Decision variables (normal tasks)
+    # Decision variables
     #   X_ijt: gast i, opgave j, hour t
     X = P.LpVariable.dicts(
-        'X', (gaster, opgaver, VAGT_TIDER), 0, 1, P.LpBinary)
+        'X', (gaster, opgaver, VAGT_TIDER_OG_DAG), 0, 1, P.LpBinary)
 
     lookup = get_counts(day_vagter + other_vagter)
 
@@ -57,19 +61,27 @@ def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
 
     # Constraints
 
+    # Ude gaster cannot perform other tasks
+    prob += P.lpSum([
+        X[i][j][t]
+        for i in ude_gaster
+        for j in [o for o in opgaver if o != Opgave.UDE] 
+        for t in VAGT_TIDER
+    ]) == 0
+
     # preassigned day vagter must be assigned
     for vagt in day_vagter:
         prob += X[vagt.gast][vagt.opgave.value][vagt.vagt_tid] == 1
 
-    # all tasks except:
-    # - UDE, PEJLEGAST_A, PEJLEGAST_B, DAEKSELEV_I_KABYS
-    # must be assigned exactly once per vagt_tid
+    # all normal tasks must be assigned exactly once per vagt_tid
+    #  except: UDE, HU, PEJLEGAST_A, PEJLEGAST_B, DAEKSELEV_I_KABYS
     for j in opgaver_norm:
         for t in VAGT_TIDER:
-            prob += P.lpSum(
-                [X[i][j][t]
-                    for i in gaster
-                 ]) == 1
+            prob += P.lpSum([
+                X[i][j][t]
+                for i 
+                in gaster
+            ]) == 1
 
     # Pejlegaster only 16-20 vagt
     for t in VAGT_TIDER:
@@ -118,7 +130,7 @@ def autofill(model: GeorgStage, skifter=[1, 2, 3, 1, 2, 3]):
     vagter = []
     for gast in gaster:
         for opgave in opgaver:
-            for vagt_tid in VAGT_TIDER:
+            for vagt_tid in VAGT_TIDER_OG_DAG:
                 x = X[gast][opgave][vagt_tid]
                 if x.varValue == 1:
                     vagter.append(

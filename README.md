@@ -3,15 +3,30 @@
 Dette er et hjælpeprogram til vagtplanlægning ombord på Georg Stage (søvagter).
 Matematikken bag programmet benytter lineær programming (LP) til at optimere vagterne,
 således at alle opgaver varetages, samtidigt med at opgaverne fordeles mellem
-gasterne så fair som muligt.
+gasterne så fair som muligt. Programmet er skrevet i Python 3.
 
-> [Opgavestyring (Kanban)](https://github.com/users/skipperkongen/projects/2/)
+> Minimum Python version: 3.7
+
+Se [Kanban](https://github.com/users/skipperkongen/projects/2/) for opgaver der p.t. er igang.
 
 ## Installation
 
-Til lokal udvikling:
+Installation med pip:
 
-```bash
+```shell
+pip install georgstage
+```
+
+Kør:
+
+```shell
+python -m georgstage
+```
+
+
+## Lokal udvikling
+
+```shell
 python3 -m venv venv
 source venv/bin/activate
 pip install -e '.[tests]'
@@ -19,14 +34,14 @@ pip install -e '.[tests]'
 
 Kør tests:
 
-```
+```shell
 make lint
 make test
 ```
 
 Start program:
 
-```
+```shell
 make run_local
 # or
 python -m georgstage

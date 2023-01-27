@@ -5,7 +5,7 @@ from dateutil.parser import parse
 import numpy as np
 
 from georgstage.autofill import lp
-from georgstage.model import GeorgStage, Vagt, Opgave
+from georgstage.model import GeorgStage, Vagt, Opgave, get_skifte_for_gast
 from georgstage.view import View, LABELS
 
 logger = logging.getLogger()
@@ -68,7 +68,7 @@ class Controller(object):
         for vagt in self.model[yesterday]:
             if vagt.opgave == Opgave.UDE:
                 logger.debug(vagt)
-                ude.append(Vagt(dato=dt, vagt_tid=vagt.vagt_tid,
+                ude.append(Vagt(dato=dt, vagt_tid=-1,
                            gast=vagt.gast, opgave=Opgave.UDE))
         return ude
 
@@ -140,7 +140,8 @@ class Controller(object):
         logger.debug('Guessing skifter')
         guesses = [None, None, None, None, None, None]
         for vagt in vagter:
-            skifte = 1 + vagt.gast // 20
+            if vagt.opgave == Opgave.UDE: continue
+            skifte = get_skifte_for_gast(vagt.gast)
             idx = vagt.vagt_tid // 4
             guesses[idx] = skifte
         return guesses
