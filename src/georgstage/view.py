@@ -313,24 +313,17 @@ class View(tk.Tk):
 
     def _refresh_vagter(self, vagter):
         # ugly, ugly HU handling
-        hu_vagter = {}
-        ude_vagter = {}
+        multi_vagter = {}
         for vagt in vagter:
             key = (vagt.opgave, vagt.vagt_tid)
-            if vagt.opgave == Opgave.HU:
-                hu_vagter.setdefault(key, []).append(str(vagt.gast))
-            elif vagt.opgave == Opgave.UDE:
-                ude_vagter.setdefault(key, []).append(str(vagt.gast))
+            if vagt.opgave in {Opgave.HU, Opgave.UDE}:
+                multi_vagter.setdefault(key, []).append(str(vagt.gast))
             else:
                 text = str(vagt.gast)
                 self._vars[key].set(text)
-        for key, gaster in hu_vagter.items():
-            text = ', '.join(gaster)
+        for key, gaster in multi_vagter.items():
+            text = ', '.join(sorted(gaster))
             self._vars[key].set(text)
-        for key, gaster in ude_vagter.items():
-            text = ', '.join(gaster)
-            self._vars[key].set(text)
-
 
     def update(self):
         logger.debug('Updating')
@@ -357,9 +350,9 @@ class View(tk.Tk):
 
     def _get_vars_helper(self):
         for k, v in self._vars.items():
-            text = v.get().strip()
-            if k[0] == Opgave.UDE:
-                for sub_text in text.split(','):
+            text = v.get().strip()                
+            if k[0] in {Opgave.UDE, Opgave.HU}:
+                for sub_text in sorted(text.split(',')):
                     yield k, sub_text.strip()
             else:
                 yield k, text

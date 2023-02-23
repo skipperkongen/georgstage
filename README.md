@@ -11,6 +11,8 @@ Se [Kanban](https://github.com/users/skipperkongen/projects/2/) for opgaver der 
 
 ## Installation
 
+### Mac OS X and Windows
+
 Installation med pip:
 
 ```shell
@@ -21,6 +23,17 @@ Kør:
 
 ```shell
 python -m georgstage
+```
+
+### Raspberry Pi
+
+Installation af dependencies:
+
+```shell
+sudo apt-get install libatlas-base-dev
+sudo apt-get install glpk-utils
+sudo pip install georgstage
+sudo pulptest
 ```
 
 
