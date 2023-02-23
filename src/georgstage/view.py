@@ -42,7 +42,7 @@ class View(tk.Tk):
         self.controller = controller
         self.model = model
         self.title('Georg Stage vagtplanlægger')
-        self.configure(bg='#A9CCE3')
+        self.configure(bg='#048A81')
         # Register validator
 
         def is_gast_or_empty(str):
@@ -156,7 +156,6 @@ class View(tk.Tk):
         # Ude
         tk.Label(self.main_frm, bg='White',
                  text=LABELS[Opgave.UDE]).grid(row=17, column=0, sticky=tk.E)
-
 
         # Make dropdown
         date_list = [NO_DATE]
@@ -302,7 +301,8 @@ class View(tk.Tk):
         self._make_list_entry(opgave=Opgave.HU, tid=4, row=15, col=6)
 
         # Ude
-        self._make_list_entry(opgave=Opgave.UDE, tid=-1, row=17, col=1, colspan=2)
+        self._make_list_entry(opgave=Opgave.UDE, tid=-1,
+                              row=17, col=1, colspan=2)
 
     def _refresh_datoer(self, datoer):
         date_list = sorted([d.isoformat() for d in datoer])
@@ -350,7 +350,7 @@ class View(tk.Tk):
 
     def _get_vars_helper(self):
         for k, v in self._vars.items():
-            text = v.get().strip()                
+            text = v.get().strip()
             if k[0] in {Opgave.UDE, Opgave.HU}:
                 for sub_text in sorted(text.split(',')):
                     yield k, sub_text.strip()
